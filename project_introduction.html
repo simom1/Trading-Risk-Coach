@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Risk Coach - 项目演示与技术说明</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #060913;
+            --bg-surface: rgba(15, 23, 42, 0.6);
+            --bg-card: rgba(30, 41, 59, 0.4);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-blue-glow: rgba(59, 130, 246, 0.15);
+            --accent-gold: #f59e0b;
+            --accent-gold-glow: rgba(245, 158, 11, 0.15);
+            --accent-emerald: #10b981;
+            --accent-purple: #8b5cf6;
+            --font-outfit: 'Outfit', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-inter);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 5% 10%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 95% 85%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header Section */
+        header {
+            text-align: center;
+            padding: 4rem 1rem 3rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            filter: blur(40px);
+            z-index: -1;
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 0.5rem 1.2rem;
+            border-radius: 99px;
+            font-family: var(--font-outfit);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-family: var(--font-outfit);
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 30%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 5rem;
+        }
+
+        .section-title {
+            font-family: var(--font-outfit);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .section-title span {
+            color: var(--accent-blue);
+        }
+
+        /* Grid Cards - Pain Points */
+        .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.25);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.05);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .icon-red {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .icon-gold {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-gold);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .icon-blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .card-title {
+            font-family: var(--font-outfit);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Flowchart Section */
+        .flow-container {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 3rem;
+            backdrop-filter: blur(12px);
+        }
+
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .flow-step:hover, .flow-step.active {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.03);
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-right: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-info {
+            flex-grow: 1;
+        }
+
+        .step-title {
+            font-family: var(--font-outfit);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .step-tag {
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.06);
+            padding: 0.2rem 0.6rem;
+            border-radius: 99px;
+            color: var(--text-secondary);
+        }
+
+        .step-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .step-detail {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 0;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            border-top: 1px solid rgba(255, 255, 255, 0);
+            padding-top: 0;
+        }
+
+        .flow-step.active .step-detail {
+            max-height: 200px;
+            margin-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 0.8rem;
+        }
+
+        /* Rubric Mapping */
+        .rubric-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .rubric-table th, .rubric-table td {
+            padding: 1.2rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .rubric-table th {
+            font-family: var(--font-outfit);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.02);
+            color: white;
+        }
+
+        .rubric-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge-verified {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            padding: 0.2rem 0.8rem;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(0,0,0,0.3);
+            color: #cbd5e1;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="logo-badge">Kaggle Capstone Project</div>
+        <h1>Trading Risk Coach</h1>
+        <p class="subtitle">一款专为个人交易者研发的多智能体风控诊断与行为去偏副驾驶系统</p>
+    </header>
+
+    <!-- Section 1: Problems Solved -->
+    <section>
+        <h2 class="section-title"><span>#</span> 解决的核心痛点 (What Problems it Solves)</h2>
+        <div class="pain-grid">
+            <div class="card">
+                <div class="card-icon icon-red">📈</div>
+                <h3 class="card-title">处置效应 (Disposition Effect)</h3>
+                <p class="card-desc">散户交易者在面对盈利时倾向于急切“落袋为安”（赚小钱就跑），而在面对亏损时却长期死扛（扛单）甚至逆势加仓，导致总期望收益为负。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-gold">🛡️</div>
+                <h3 class="card-title">量化风险意识缺失</h3>
+                <p class="card-desc">普通投资者缺乏对下行风险敞口的科学量化手段，无法计算单笔最大风险暴露（VaR/CVaR）以及评估平台和资产集中度风险。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-blue">🚦</div>
+                <h3 class="card-title">情感决策与AI幻觉</h3>
+                <p class="card-desc">交易者在连续亏损时易陷入“赌徒谬误”进行非理性补仓。同时，通用AI大模型给出的风控建议也易产生幻觉，误导用户做出高风险操作。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: What it Does & Workflow -->
+    <section>
+        <h2 class="section-title"><span>#</span> 系统工作流程 (Agentic Pipeline)</h2>
+        <div class="flow-container">
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">点击下方每一个运行步骤，查看具体的底层执行逻辑与对应的代码文件：</p>
+            <div class="flow-steps">
+                
+                <div class="flow-step active" onclick="toggleStep(this)">
+                    <div class="step-number">1</div>
+                    <div class="step-info">
+                        <div class="step-title">数据加载与指标计算 <span class="step-tag">Analysis Agent</span></div>
+                        <p class="step-desc">系统启动后，调用 MCP 数据服务，拉取交易流水并科学计算核心量化指标。</p>
+                        <div class="step-detail">
+                            对应文件：<code>trading_risk_coach/agents/analysis_agent.py</code><br>
+                            逻辑：通过 Stdio 连接标准 MCP 数据包，执行 Python 进行胜率、盈亏比（平均盈利 vs 平均亏损绝对值）、单笔亏损极值的数学计算，完成<b>Observe（观察）</b>阶段。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step" onclick="toggleStep(this)">
+                    <div class="step-number">2</div>
+                    <div class="step-info">
+                        <div class="step-title">规则注入与风险诊断 <span class="step-tag">Advisor Agent</span></div>
+                        <p class="step-desc">对比行为金融学 Skill 规范，判定是否存在偏差，并针对高危活跃持仓触发风控干预。</p>
+                        <div class="step-detail">
+                            对应文件：<code>trading_risk_coach/agents/advisor_agent.py</code><br>
+                            逻辑：读取 <code>SKILL.md</code> 规范，若判定“盈亏比 < 1.5”则触发处置效应警报。若发现活跃持仓中存在未挂止损高危单，将直接调用风控工具（设置硬止损/紧急平仓），完成<b>Think & Act（思考与行动）</b>阶段。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step" onclick="toggleStep(this)">
+                    <div class="step-number">3</div>
+                    <div class="step-info">
+                        <div class="step-title">零信任硬拦截安全过滤 <span class="step-tag">Guardrail Callback</span></div>
+                        <p class="step-desc">在风控决策输出给用户之前，由确定性 Python 熔断护栏过滤拦截潜在的危险投资建议。</p>
+                        <div class="step-detail">
+                            对应文件：<code>trading_risk_coach/guardrails/safety_rules.py</code><br>
+                            逻辑：大模型生成的文本经过注册的 <code>after_model_callback</code> 拦截。如果文本中包含任何“加仓回本”、“摊平成本”等赌徒谬误词汇，系统会强行抹除并替换为标准的红色安全警报文本，实现<b>物理级别零信任拦截</b>。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step" onclick="toggleStep(this)">
+                    <div class="step-number">4</div>
+                    <div class="step-info">
+                        <div class="step-title">审计排版与风控意见书呈献 <span class="step-tag">Critic Agent</span></div>
+                        <p class="step-desc">审计生成的报告以确保指标准确度，进行三态风控评级分类，并生成工整的报告。</p>
+                        <div class="step-detail">
+                            对应文件：<code>trading_risk_coach/agents/critic_agent.py</code><br>
+                            逻辑：对前序报告执行 QA 审查，确切核对每一项数字指标是否具备数据依据，并根据安全状态将其分类为：🟢 【绿灯 - 安全】、🟡 【黄灯 - 警报观察】、🔴 【红灯 - 熔断执行】，产出终审报告。
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Rubric Compliance -->
+    <section>
+        <h2 class="section-title"><span>#</span> Kaggle Rubric 概念对齐 (Kaggle Evaluation Mapping)</h2>
+        <table class="rubric-table">
+            <thead>
+                <tr>
+                    <th>评测核心要素</th>
+                    <th>项目具体技术实现</th>
+                    <th>源码映射位置</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><b>ADK Agent & Multi-Agent</b></td>
+                    <td>定义了 Analysis -> Advisor -> Critic 三个智能体，并使用 Google ADK 工作流进行串联。</td>
+                    <td><code>trading_risk_coach/agent.py</code></td>
+                    <td><span class="badge-verified">Verified</span></td>
+                </tr>
+                <tr>
+                    <td><b>MCP Server (stdio)</b></td>
+                    <td>运行独立的 FastMCP 服务端，向 AI 暴露读取流水和写入风控修改的双向工具集。</td>
+                    <td><code>trading_risk_coach/mcp_server/trade_data_server.py</code></td>
+                    <td><span class="badge-verified">Verified</span></td>
+                </tr>
+                <tr>
+                    <td><b>Agent Skills</b></td>
+                    <td>将处置效应公式（平均亏损 / 平均盈利）和三态风控判定标准制作为独立的 Skill，动态解耦注入。</td>
+                    <td><code>trading_risk_coach/skills/risk_pattern_detection/SKILL.md</code></td>
+                    <td><span class="badge-verified">Verified</span></td>
+                </tr>
+                <tr>
+                    <td><b>Security Features</b></td>
+                    <td>通过 <code>after_model_callback</code> 拦截响应，利用确定性 Python 正则安全机制切断扛单和补仓建议。</td>
+                    <td><code>trading_risk_coach/guardrails/safety_rules.py</code></td>
+                    <td><span class="badge-verified">Verified</span></td>
+                </tr>
+                <tr>
+                    <td><b>Deployability</b></td>
+                    <td>提供了轻量化的 slim-Dockerfile，支持一键打包部署至 Google Cloud Run 云端平台。</td>
+                    <td><code>Dockerfile</code> & <code>requirements.txt</code></td>
+                    <td><span class="badge-verified">Verified</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Trading Risk Coach — Kaggle Capstone Project</p>
+    </footer>
+</div>
+
+<script>
+    function toggleStep(element) {
+        // Remove active class from all steps
+        const steps = document.querySelectorAll('.flow-step');
+        steps.forEach(step => {
+            if (step !== element) {
+                step.classList.remove('active');
+            }
+        });
+        
+        // Toggle active class on clicked step
+        element.classList.toggle('active');
+    }
+</script>
+
+</body>
+</html>
