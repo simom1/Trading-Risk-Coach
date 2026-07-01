@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Risk Coach — 智能风控与主动去偏大屏</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #080c14;
+            --bg-secondary: rgba(15, 23, 42, 0.6);
+            --card-bg: rgba(30, 41, 59, 0.35);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --accent-green: #10b981;
+            --glow-red: rgba(239, 68, 68, 0.15);
+            --glow-blue: rgba(59, 130, 246, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 5% 10%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 95% 90%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+            padding: 2rem;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Header block */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
+
+        .brand-section h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-section p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0.35rem;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--accent-green);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        /* Metrics grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(16px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .metric-card.blue::before { background: var(--accent-blue); }
+        .metric-card.purple::before { background: var(--accent-purple); }
+        .metric-card.red::before { background: var(--accent-red); }
+        .metric-card.green::before { background: var(--accent-green); }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .metric-card.red .metric-value { color: #fca5a5; }
+        .metric-card.blue .metric-value { color: #93c5fd; }
+        .metric-card.green .metric-value { color: #6ee7b7; }
+
+        .metric-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Warning banner */
+        .alert-banner {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: 0 0 20px var(--glow-red);
+            animation: pulse-red 2s infinite alternate;
+        }
+
+        @keyframes pulse-red {
+            from { box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
+            to { box-shadow: 0 0 25px rgba(239, 68, 68, 0.25); }
+        }
+
+        .alert-icon {
+            font-size: 2rem;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-4px); }
+        }
+
+        .alert-text h3 {
+            font-family: 'Outfit', sans-serif;
+            color: #fca5a5;
+            font-size: 1.15rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-text p {
+            color: #d1d5db;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Main layout grid */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .panel-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Active copilot terminal console */
+        .terminal-box {
+            background: #090d16;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 1.25rem;
+            height: 280px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .term-line {
+            line-height: 1.4;
+        }
+
+        .term-time { color: #6b7280; margin-right: 0.5rem; }
+        .term-info { color: #3b82f6; }
+        .term-warn { color: #f59e0b; }
+        .term-err { color: #ef4444; font-weight: bold; }
+        .term-succ { color: #10b981; }
+
+        /* Advisor coach advice cards */
+        .advice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .advice-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s;
+        }
+
+        .advice-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--accent-purple);
+        }
+
+        .advice-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: #93c5fd;
+            margin-bottom: 0.5rem;
+        }
+
+        .advice-badge {
+            background: rgba(139, 92, 246, 0.15);
+            color: #c084fc;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .advice-desc {
+            font-size: 0.9rem;
+            color: #d1d5db;
+            line-height: 1.5;
+        }
+
+        /* Action buttons */
+        .btn-run {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            color: white;
+            border: none;
+            padding: 0.85rem 1.75rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            text-align: center;
+        }
+
+        .btn-run:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    
+    <!-- Top Header -->
+    <header>
+        <div class="brand-section">
+            <h1>Trading Risk Coach</h1>
+            <p>基于多智能体决策与零信任物理护栏的主动去偏风控终端</p>
+        </div>
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            ACTIVE RISK COPILOT 在线
+        </div>
+    </header>
+
+    <!-- Alert Banner (Disposition Effect warning) -->
+    <div class="alert-banner">
+        <span class="alert-icon">⚠️</span>
+        <div class="alert-text">
+            <h3>检测到严重认知偏差：处置效应（Disposition Effect / 赢小亏大）</h3>
+            <p>基于你的历史交割单统计，你的平均亏损为 $130.82，平均盈利为 $48.27。你的平均亏损达到了平均盈利的 <strong>2.71 倍</strong>，远远超过了 1.5 倍的安全判定警戒线！这说明你存在极度危险的“扛单”和“赢利早跑”习惯，账户处于高风险破产路径上。</p>
+        </div>
+    </div>
+
+    <!-- Core Metrics Dashboard Grid -->
+    <div class="metrics-grid">
+        <div class="metric-card blue">
+            <div class="metric-label">账户初始余额</div>
+            <div class="metric-value">$10,000.00</div>
+            <div class="metric-desc">Mock Broker 模拟交易池资金</div>
+        </div>
+        <div class="metric-card red">
+            <div class="metric-label">盈亏比比率 (亏/赢)</div>
+            <div class="metric-value">2.71x</div>
+            <div class="metric-desc">安全界限: <1.5x (已超出警报)</div>
+        </div>
+        <div class="metric-card green">
+            <div class="metric-label">交割单胜率</div>
+            <div class="metric-value">45.0%</div>
+            <div class="metric-desc">分析样本: 最近40笔 XAUUSD 交易</div>
+        </div>
+        <div class="metric-card purple">
+            <div class="metric-label">品种集中度风险</div>
+            <div class="metric-value">90.0%</div>
+            <div class="metric-desc">XAUUSD 持仓过度集中 (警戒线 80%)</div>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-grid">
+        
+        <!-- Left Column: Data Chart & Active Mitigations -->
+        <div style="display:flex; flex-direction:column; gap:2rem;">
+            <!-- Chart Panel -->
+            <div class="panel">
+                <div class="panel-title">📉 盈亏分布与行为去偏统计图</div>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Terminal Log Panel -->
+            <div class="panel">
+                <div class="panel-title">📟 Active Copilot 风控执行终端（模拟交易所）</div>
+                <div class="terminal-box" id="termConsole">
+                    <div class="term-line"><span class="term-time">[00:00:01]</span> <span class="term-info">[SYSTEM]</span> Active Risk Copilot initialized. Listening to broker stdio channel.</div>
+                    <div class="term-line"><span class="term-time">[00:00:02]</span> <span class="term-info">[SYSTEM]</span> decopled MCP database connected. Loading sample_trades.csv...</div>
+                    <div class="term-line"><span class="term-time">[00:00:03]</span> <span class="term-info">[SYSTEM]</span> Loaded 40 historical trade logs of XAUUSD & USOIL.</div>
+                    <!-- Dynamically appended on click -->
+                </div>
+                <button class="btn-run" onclick="triggerWinddown()">一键启动风控评估与主动作业</button>
+            </div>
+        </div>
+
+        <!-- Right Column: Advisor Recommendations -->
+        <div class="panel">
+            <div class="panel-title">🛡️ Advisor Agent 智能风控与认知去偏建议</div>
+            <div class="advice-list">
+                <div class="advice-card">
+                    <div class="advice-header">
+                        <span>1. 强制设定硬止损 (Hard Stop-Loss)</span>
+                        <span class="advice-badge">紧急建议</span>
+                    </div>
+                    <div class="advice-desc">数据表明你的单笔最大亏损达到 $364.00。在接下来的黄金交易中，单笔止损幅度绝不能根据主观感觉放大，必须强制固定以 ATR 波动率指标的 1.5 倍作为止损线，物理限制亏损扩张。</div>
+                </div>
+                
+                <div class="advice-card">
+                    <div class="advice-header">
+                        <span>2. 锁定 2:1 盈亏比离场规则</span>
+                        <span class="advice-badge">行为去偏</span>
+                    </div>
+                    <div class="advice-desc">为了对抗你的处置效应（平均亏损是平均盈利的 2.71 倍），必须在出场机制上做强制约束：不到 2:1 盈亏比绝不提前手动离场，以此将盈亏数学期望强行拉回正数轨道。</div>
+                </div>
+
+                <div class="advice-card">
+                    <div class="advice-header">
+                        <span>3. 分散品种与平台敞口</span>
+                        <span class="advice-badge">配置优化</span>
+                    </div>
+                    <div class="advice-desc">你的品种集中度高达 90.0%（全部集中在黄金 XAUUSD 且偏好 ANZO 平台）。这导致你极易受到特定品种流动性风险的冲击，建议控制单品种持仓比率在 80% 以下。</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Initialize chart
+    const ctx = document.getElementById('riskChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['历史平均盈利', '历史平均亏损', '系统判定安全均亏线'],
+            datasets: [{
+                label: '金额 (USD)',
+                data: [48.27, -130.82, -72.40],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.4)',
+                    'rgba(239, 68, 68, 0.4)',
+                    'rgba(59, 130, 246, 0.2)'
+                ],
+                borderColor: [
+                    '#10b981',
+                    '#ef4444',
+                    '#3b82f6'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { color: '#9ca3af' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#9ca3af' }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    function triggerWinddown() {
+        const consoleEl = document.getElementById('termConsole');
+        
+        const logs = [
+            { type: 'info', text: 'Workflow started: START -> analysis_agent -> advisor_agent.' },
+            { type: 'info', text: 'analysis_agent: Calculating client metrics... Win-Rate: 45.0%, Avg Loss/Win: 2.71x.' },
+            { type: 'warn', text: 'analysis_agent: Warning! Disposition Effect (Win-Small-Lose-Big) threshold breached!' },
+            { type: 'info', text: 'advisor_agent: Evaluating active broker positions... 1 critical warning found.' },
+            { type: 'err', text: 'advisor_agent ALERT: Active Position XAUUSD Buy (Ticket: T1001) has no Stop Loss! Floating loss expanding!' },
+            { type: 'info', text: 'advisor_agent: Requesting execute_risk_mitigation [Action: set_hard_sl, Ticket: T1001, Parameter: 2350.0]...' },
+            { type: 'succ', text: 'Mock Broker Response: [Success] Stop Loss successfully set to 2350.00 for Order T1001. Protection active.' },
+            { type: 'succ', text: 'ADK after_model_callback: Output sanitized and safety check passed.' },
+            { type: 'info', text: 'Workflow completed successfully. Final safe report generated.' }
+        ];
+
+        let delay = 0;
+        logs.forEach(log => {
+            setTimeout(() => {
+                const line = document.createElement('div');
+                line.className = 'term-line';
+                const time = new Date().toLocaleTimeString();
+                
+                let typeClass = 'term-info';
+                if (log.type === 'warn') typeClass = 'term-warn';
+                if (log.type === 'err') typeClass = 'term-err';
+                if (log.type === 'succ') typeClass = 'term-succ';
+
+                line.innerHTML = `<span class="term-time">[${time}]</span> <span class="${typeClass}">[${log.type.toUpperCase()}]</span> ${log.text}`;
+                consoleEl.appendChild(line);
+                consoleEl.scrollTop = consoleEl.scrollHeight;
+            }, delay);
+            delay += 600;
+        });
+    }
+</script>
+</body>
+</html>
