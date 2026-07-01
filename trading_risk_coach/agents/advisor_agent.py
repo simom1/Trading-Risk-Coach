@@ -35,7 +35,12 @@ else:
 # Output interception callback (Guardrail hook)
 async def safety_guardrail_callback(callback_context: CallbackContext, llm_response: LlmResponse, **kwargs) -> LlmResponse:
     """Intercepts the LLM response to verify and sanitize safety issues before output."""
-    llm_response.text = sanitize_advice(llm_response.text)
+    if hasattr(llm_response, "text") and llm_response.text is not None:
+        llm_response.text = sanitize_advice(llm_response.text)
+    elif llm_response.content and llm_response.content.parts:
+        for part in llm_response.content.parts:
+            if part.text:
+                part.text = sanitize_advice(part.text)
     return llm_response
 
 # Define the Advisor Agent
