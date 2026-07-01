@@ -46,7 +46,7 @@ async def safety_guardrail_callback(callback_context: CallbackContext, llm_respo
 # Define the Advisor Agent
 advisor_agent = Agent(
     name="advisor_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.1-flash-lite",
     description="基于分析结果生成并执行风控建议，保护账户安全。",
     tools=[trade_data_toolset],  # ✨ Bind MCP toolset to enable active execution actions
     after_model_callback=safety_guardrail_callback,  # ✨ Wire output interceptor hook

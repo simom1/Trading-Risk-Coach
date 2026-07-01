@@ -22,7 +22,7 @@ from google.adk import Agent
 # Define the Critic Agent
 critic_agent = Agent(
     name="critic_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.1-flash-lite",
     description="对风控建议进行审计与格式化，确保建议具备严谨的数据指标支撑。",
     instruction="""你是一名风控审查员（Critic Agent）。
 

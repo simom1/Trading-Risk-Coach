@@ -48,7 +48,7 @@ trade_data_toolset = MCPToolset(
 # Define the Analysis Agent
 analysis_agent = Agent(
     name="analysis_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.1-flash-lite",
     description="读取交易记录并计算关键风控指标（胜率、盈亏比、止损合理性等）。",
     instruction="""你是一名量化交易复盘分析师。
 
