@@ -33,10 +33,10 @@ else:
     skill_content = "指标阈值警报：平均亏损绝对值 / 平均盈利 >= 1.5 判定为赢小亏大反模式。"
 
 # Output interception callback (Guardrail hook)
-async def safety_guardrail_callback(context: CallbackContext, response: LlmResponse) -> LlmResponse:
+async def safety_guardrail_callback(callback_context: CallbackContext, llm_response: LlmResponse, **kwargs) -> LlmResponse:
     """Intercepts the LLM response to verify and sanitize safety issues before output."""
-    response.text = sanitize_advice(response.text)
-    return response
+    llm_response.text = sanitize_advice(llm_response.text)
+    return llm_response
 
 # Define the Advisor Agent
 advisor_agent = Agent(

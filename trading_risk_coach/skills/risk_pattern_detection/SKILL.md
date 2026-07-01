@@ -3,8 +3,8 @@
 
 ## 📊 1. Quantitative Bias Thresholds (心理偏差定量阈值)
 *   **Disposition Effect Index (处置效应系数)**:
-    $$\text{Ratio} = \frac{\text{Average Loss Absolute Value}}{\text{Average Win Value}}$$
-    *   **Rule**: If $\text{Ratio} \ge 1.5$, trigger a **Disposition Effect Warning (赢小亏大反模式)**.
+    Ratio = (Average Loss Absolute Value) / (Average Win Value)
+    *   **Rule**: If Ratio >= 1.5, trigger a **Disposition Effect Warning (赢小亏大反模式)**.
 *   **Position Sizing Risk Limit**:
     *   Single trade risk must not exceed **2.0% of total capital equity**.
 
