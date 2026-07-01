@@ -21,6 +21,7 @@ to ingest and analyze trade data. By limiting its scope to data aggregation and 
 """
 
 import os
+import sys
 from google.adk import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
@@ -37,7 +38,7 @@ _SERVER_SCRIPT = os.path.join(
 trade_data_toolset = MCPToolset(
     connection_params=StdioConnectionParams(
         server_params=StdioServerParameters(
-            command="python",
+            command=sys.executable,
             args=[_SERVER_SCRIPT],
         ),
         timeout=30,  # 30 seconds connection timeout
