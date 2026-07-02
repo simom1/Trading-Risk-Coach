@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Risk Coach — 系统可视化仪表盘</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #070d1a; --bg2: #0d1526; --bg3: #111e35;
+      --border: rgba(99,179,237,0.12);
+      --blue: #3b82f6; --cyan: #06b6d4; --purple: #8b5cf6;
+      --green: #10b981; --yellow: #f59e0b; --red: #ef4444;
+      --text: #e2e8f0; --muted: #64748b;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; line-height:1.6; }
+
+    .header {
+      background: linear-gradient(135deg,#0d1526,#111e35);
+      border-bottom:1px solid var(--border); padding:2rem 3rem;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .header h1 {
+      font-family:'Outfit',sans-serif; font-size:1.9rem; font-weight:800;
+      background:linear-gradient(90deg,#60a5fa,#a78bfa);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .header p { color:var(--muted); font-size:0.88rem; margin-top:0.2rem; }
+    .badges { display:flex; gap:0.6rem; flex-wrap:wrap; }
+    .badge { padding:0.3rem 0.8rem; border-radius:20px; font-size:0.75rem; font-weight:600; border:1px solid; }
+    .b-blue   { background:rgba(59,130,246,0.15); border-color:rgba(59,130,246,0.4); color:#93c5fd; }
+    .b-green  { background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); color:#6ee7b7; }
+    .b-purple { background:rgba(139,92,246,0.15); border-color:rgba(139,92,246,0.4); color:#c4b5fd; }
+
+    .main { padding:2rem 3rem; max-width:1400px; margin:0 auto; }
+    .sec-title {
+      font-family:'Outfit',sans-serif; font-size:1.1rem; font-weight:700;
+      color:#93c5fd; margin:2rem 0 1.2rem;
+      padding-bottom:0.5rem; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:0.5rem;
+    }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--blue); box-shadow:0 0 8px var(--blue); flex-shrink:0; }
+
+    /* KPI */
+    .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+    .kpi {
+      background:var(--bg2); border:1px solid var(--border); border-radius:14px;
+      padding:1.4rem; position:relative; overflow:hidden;
+      transition:transform 0.2s,border-color 0.2s;
+    }
+    .kpi:hover { transform:translateY(-3px); border-color:rgba(99,179,237,0.3); }
+    .kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:14px 14px 0 0; }
+    .kpi.c-blue::before   { background:linear-gradient(90deg,#3b82f6,#06b6d4); }
+    .kpi.c-green::before  { background:linear-gradient(90deg,#10b981,#34d399); }
+    .kpi.c-yellow::before { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .kpi.c-red::before    { background:linear-gradient(90deg,#ef4444,#f87171); }
+    .kpi.c-purple::before { background:linear-gradient(90deg,#8b5cf6,#a78bfa); }
+    .kpi-lbl { font-size:0.75rem; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:.05em; }
+    .kpi-val { font-family:'Outfit',sans-serif; font-size:2rem; font-weight:800; margin:.3rem 0; }
+    .kpi-val.t-green  { color:#34d399; } .kpi-val.t-yellow { color:#fbbf24; }
+    .kpi-val.t-red    { color:#f87171; } .kpi-val.t-blue   { color:#60a5fa; }
+    .kpi-val.t-purple { color:#c4b5fd; }
+    .kpi-sub { font-size:0.78rem; color:var(--muted); }
+
+    /* Charts */
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.5rem; }
+    .card { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:1.5rem; }
+    .card h3 { font-family:'Outfit',sans-serif; font-size:0.9rem; font-weight:600; color:#93c5fd; margin-bottom:1rem; }
+    .ch { position:relative; height:230px; }
+    .ch-sm { position:relative; height:200px; }
+
+    /* Pipeline */
+    .pipeline {
+      display:flex; align-items:center;
+      background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:2rem;
+    }
+    .pnode { flex:1; text-align:center; }
+    .pbox {
+      background:var(--bg3); border:1px solid var(--border); border-radius:10px;
+      padding:1rem 0.6rem; transition:all 0.3s; cursor:default;
+    }
+    .pbox:hover { border-color:var(--blue); box-shadow:0 0 20px rgba(59,130,246,0.2); transform:translateY(-3px); }
+    .picon { font-size:1.7rem; margin-bottom:.3rem; }
+    .pname { font-family:'Outfit',sans-serif; font-size:0.82rem; font-weight:700; color:#93c5fd; }
+    .pdesc { font-size:0.68rem; color:var(--muted); margin-top:.25rem; line-height:1.4; }
+    .ptags { display:flex; flex-wrap:wrap; gap:.25rem; justify-content:center; margin-top:.4rem; }
+    .ptag { font-size:0.6rem; padding:.12rem .4rem; border-radius:6px; font-weight:600; background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3); }
+    .ptag.g { background:rgba(16,185,129,0.15); color:#6ee7b7; border-color:rgba(16,185,129,0.3); }
+    .ptag.r { background:rgba(239,68,68,0.15); color:#fca5a5; border-color:rgba(239,68,68,0.3); }
+    .ptag.p { background:rgba(139,92,246,0.15); color:#c4b5fd; border-color:rgba(139,92,246,0.3); }
+    .parr { width:36px; text-align:center; color:var(--blue); font-size:1.1rem; flex-shrink:0; }
+
+    /* Risk gauge */
+    .gauge-row { display:flex; gap:1rem; justify-content:space-around; padding:1rem 0; align-items:flex-start; }
+    .gitem { text-align:center; }
+    .gcircle {
+      width:85px; height:85px; border-radius:50%; border:3px solid;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      font-family:'Outfit',sans-serif; font-weight:800;
+    }
+    .gcircle.g  { border-color:#10b981; background:rgba(16,185,129,0.1); color:#34d399; }
+    .gcircle.y  { border-color:#f59e0b; background:rgba(245,158,11,0.1); color:#fbbf24; }
+    .gcircle.rd { border-color:#ef4444; background:rgba(239,68,68,0.1); color:#f87171; }
+    .gcircle.b  { border-color:#3b82f6; background:rgba(59,130,246,0.1); color:#60a5fa; }
+    .gcircle.pp { border-color:#8b5cf6; background:rgba(139,92,246,0.1); color:#c4b5fd; }
+    .gval { font-size:1.2rem; line-height:1; }
+    .gunit { font-size:0.58rem; color:var(--muted); margin-top:.1rem; }
+    .glbl { font-size:0.7rem; color:var(--muted); margin-top:.4rem; line-height:1.4; max-width:90px; }
+    .gsep { display:flex; align-items:center; color:var(--muted); font-size:1.6rem; padding:0 .3rem; }
+
+    /* Guardrail demo */
+    .demo-grid { display:grid; grid-template-columns:1fr auto 1fr; gap:1rem; align-items:center; }
+    .dbox { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:1.4rem; }
+    .dbox.danger { border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.04); }
+    .dbox.safe   { border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.04); }
+    .dlbl { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:.8rem; }
+    .dlbl.r { color:#f87171; } .dlbl.g { color:#34d399; }
+    .dtxt { font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.8; }
+    .hr  { color:#f87171; font-weight:600; background:rgba(239,68,68,0.15); border-radius:3px; padding:0 3px; }
+    .hg  { color:#34d399; font-weight:600; }
+    .dmid { text-align:center; }
+    .dmid .icon { font-size:1.8rem; }
+    .dmid .lbl  { font-size:0.7rem; color:var(--purple); margin-top:.3rem; }
+    .dmid .sub  { font-size:0.65rem; color:var(--muted); }
+
+    /* Insight */
+    .igrid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+    .icard { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:1.4rem; }
+    .iicon { font-size:1.5rem; margin-bottom:.5rem; }
+    .ititle { font-family:'Outfit',sans-serif; font-size:0.9rem; font-weight:700; margin-bottom:.4rem; }
+    .ititle.g { color:#34d399; } .ititle.y { color:#fbbf24; } .ititle.r { color:#f87171; }
+    .ibody { font-size:0.8rem; color:var(--muted); line-height:1.6; }
+    .ibody strong { color:var(--text); }
+
+    .footer { text-align:center; padding:1.5rem; color:var(--muted); font-size:0.78rem; border-top:1px solid var(--border); margin-top:1rem; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📊 Trading Risk Coach — 系统可视化仪表盘</h1>
+    <p>真实 MT5 账户 8010234 · XAUUSD · 3,225 条交易记录 · 2025-11 ~ 2026-06</p>
+  </div>
+  <div class="badges">
+    <span class="badge b-blue">Google ADK Multi-Agent</span>
+    <span class="badge b-green">173K Real M1 Candles</span>
+    <span class="badge b-purple">Kaggle Capstone</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPI -->
+  <div class="sec-title"><span class="dot"></span>账户核心量化指标（真实数据）</div>
+  <div class="kpi-grid">
+    <div class="kpi c-blue"><div class="kpi-lbl">总交易笔数</div><div class="kpi-val t-blue">3,225</div><div class="kpi-sub">XAUUSD · Nov 2025 – Jun 2026</div></div>
+    <div class="kpi c-green"><div class="kpi-lbl">总胜率</div><div class="kpi-val t-green">58.6%</div><div class="kpi-sub">盈利 1,890 笔 / 亏损 1,335 笔</div></div>
+    <div class="kpi c-yellow"><div class="kpi-lbl">处置效应系数</div><div class="kpi-val t-yellow">0.99×</div><div class="kpi-sub">avg_loss / avg_win · 阈值 1.5×</div></div>
+    <div class="kpi c-green"><div class="kpi-lbl">账户总盈亏</div><div class="kpi-val t-green">+$255K</div><div class="kpi-sub">半年累计净盈利</div></div>
+    <div class="kpi c-blue"><div class="kpi-lbl">平均盈利/笔</div><div class="kpi-val t-blue">+$447</div><div class="kpi-sub">盈利单均值</div></div>
+    <div class="kpi c-red"><div class="kpi-lbl">平均亏损/笔</div><div class="kpi-val t-red">-$443</div><div class="kpi-sub">亏损单均值</div></div>
+    <div class="kpi c-yellow"><div class="kpi-lbl">止损触发率</div><div class="kpi-val t-yellow">31.1%</div><div class="kpi-sub">SL 1,002笔 / 手动 2,223笔</div></div>
+    <div class="kpi c-purple"><div class="kpi-lbl">最大单笔范围</div><div class="kpi-val t-purple">$31K</div><div class="kpi-sub">极值差 ($16,442 / -$14,935)</div></div>
+  </div>
+
+  <!-- Charts -->
+  <div class="sec-title"><span class="dot"></span>数据可视化分析</div>
+  <div class="grid2" style="margin-bottom:1.5rem;">
+    <div class="card"><h3>📅 月度净盈亏（USD）</h3><div class="ch"><canvas id="c1"></canvas></div></div>
+    <div class="card"><h3>📊 盈亏分布直方图（笔数）</h3><div class="ch"><canvas id="c2"></canvas></div></div>
+  </div>
+  <div class="grid3" style="margin-bottom:1.5rem;">
+    <div class="card"><h3>📈 月度胜率趋势</h3><div class="ch-sm"><canvas id="c3"></canvas></div></div>
+    <div class="card"><h3>⚖️ 盈亏结构对比</h3><div class="ch-sm"><canvas id="c4"></canvas></div></div>
+    <div class="card"><h3>🕐 平均持仓时长（分钟）</h3><div class="ch-sm"><canvas id="c5"></canvas></div></div>
+  </div>
+
+  <!-- Risk States -->
+  <div class="sec-title"><span class="dot"></span>三态风控评级系统（Agent 决策逻辑）</div>
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="gauge-row">
+      <div class="gitem">
+        <div class="gcircle g"><div class="gval">🟢</div><div class="gunit">SAFE</div></div>
+        <div class="glbl">绿灯 · 安全<br>持仓均有止损<br>风险 ≤ 1.0%<br><strong style="color:#34d399">→ 保持观察</strong></div>
+      </div>
+      <div class="gsep">→</div>
+      <div class="gitem">
+        <div class="gcircle y"><div class="gval">🟡</div><div class="gunit">WATCH</div></div>
+        <div class="glbl">黄灯 · 警报<br>缺止损但波动低<br><strong style="color:#fbbf24">→ 自动挂止损</strong><br>不平仓</div>
+      </div>
+      <div class="gsep">→</div>
+      <div class="gitem">
+        <div class="gcircle rd"><div class="gval">🔴</div><div class="gunit">BREAKER</div></div>
+        <div class="glbl">红灯 · 熔断<br>回撤 &gt;5% 或<br>波动急剧放大<br><strong style="color:#f87171">→ 紧急强平</strong></div>
+      </div>
+      <div class="gsep" style="font-size:1rem;padding:0 1rem;">‖</div>
+      <div class="gitem">
+        <div class="gcircle b"><div class="gval" style="font-size:0.85rem;">ATR</div><div class="gunit">M1 DATA</div></div>
+        <div class="glbl">真实 M1 K线<br>173,391 条<br>实时波动率<br>判断依据</div>
+      </div>
+      <div class="gsep" style="font-size:1rem;padding:0 1rem;">‖</div>
+      <div class="gitem">
+        <div class="gcircle pp"><div class="gval" style="font-size:0.8rem;">SKILL</div><div class="gunit">.MD</div></div>
+        <div class="glbl">技能规范<br>Ratio ≥ 1.5<br>单笔风险 ≤ 2%<br>规则引擎</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="sec-title"><span class="dot"></span>多智能体处理流水线（Google ADK）</div>
+  <div class="pipeline" style="margin-bottom:1.5rem;">
+    <div class="pnode"><div class="pbox"><div class="picon">📥</div><div class="pname">用户输入</div><div class="pdesc">交易复盘请求</div><div class="ptags"><span class="ptag">START</span></div></div></div>
+    <div class="parr">→</div>
+    <div class="pnode"><div class="pbox"><div class="picon">🔍</div><div class="pname">Analysis Agent</div><div class="pdesc">调用 MCP 工具<br>计算量化指标</div><div class="ptags"><span class="ptag">MCP Read</span><span class="ptag">胜率/盈亏比</span><span class="ptag">ATR</span></div></div></div>
+    <div class="parr">→</div>
+    <div class="pnode"><div class="pbox"><div class="picon">⚡</div><div class="pname">Advisor Agent</div><div class="pdesc">对比 SKILL.md 规则<br>主动执行风控</div><div class="ptags"><span class="ptag">SKILL.md</span><span class="ptag g">set_hard_sl</span><span class="ptag r">emergency_close</span></div></div></div>
+    <div class="parr">→</div>
+    <div class="pnode"><div class="pbox"><div class="picon">🛡️</div><div class="pname">Safety Guardrail</div><div class="pdesc">确定性正则拦截<br>&lt;1ms 阻断危险建议</div><div class="ptags"><span class="ptag r">加仓摊平 ❌</span><span class="ptag r">扛单 ❌</span><span class="ptag r">马丁格尔 ❌</span></div></div></div>
+    <div class="parr">→</div>
+    <div class="pnode"><div class="pbox"><div class="picon">📋</div><div class="pname">Critic Agent</div><div class="pdesc">审计数字准确性<br>格式化诊断意见书</div><div class="ptags"><span class="ptag p">QA 审计</span><span class="ptag p">三态评级</span></div></div></div>
+    <div class="parr">→</div>
+    <div class="pnode"><div class="pbox"><div class="picon">✅</div><div class="pname">安全建议输出</div><div class="pdesc">量化诊断意见书<br>风控执行记录</div><div class="ptags"><span class="ptag g">SAFE OUTPUT</span></div></div></div>
+  </div>
+
+  <!-- Guardrail Demo -->
+  <div class="sec-title"><span class="dot"></span>安全护栏实际拦截演示（确定性 Python 规则）</div>
+  <div class="demo-grid" style="margin-bottom:1.5rem;">
+    <div class="dbox danger">
+      <div class="dlbl r">⚠️ LLM 原始输出（危险）</div>
+      <div class="dtxt">
+        账户目前浮亏 $3,200，建议在当前<br>
+        价位 <span class="hr">加仓摊平成本</span>，将均价从<br>
+        $4,380 拉低到 $4,360，等待金价<br>
+        反弹后统一获利了结。<br><br>
+        同时可以考虑 <span class="hr">扛单</span>，历史经验<br>
+        表明黄金波动后总会回归。
+      </div>
+    </div>
+    <div class="dmid">
+      <div class="icon">⚡️</div>
+      <div class="lbl">safety_rules.py<br>after_model_callback</div>
+      <div class="sub">&lt;1ms 拦截</div>
+    </div>
+    <div class="dbox safe">
+      <div class="dlbl g">✅ 护栏处理后输出（安全）</div>
+      <div class="dtxt">
+        <span class="hg">[安全护栏已拦截原始建议]</span><br>
+        检测到该建议包含高风险仓位<br>
+        管理逻辑（加仓摊平、扛单）。<br>
+        系统不会输出此类建议。<br><br>
+        建议改为：<br>
+        · 复盘止损位设置是否合理<br>
+        · <span class="hg">降低单笔风险敞口至 2% 以下</span><br>
+        · 咨询持牌财务顾问
+      </div>
+    </div>
+  </div>
+
+  <!-- Insights -->
+  <div class="sec-title"><span class="dot"></span>系统发现的关键问题与改善建议</div>
+  <div class="igrid">
+    <div class="icard"><div class="iicon">✅</div><div class="ititle g">处置效应：基本健康</div><div class="ibody">处置效应系数 <strong>0.99×</strong>（阈值 1.5×），没有明显"赢小亏大"结构。平均盈利 <strong>$447</strong> 与亏损 <strong>$443</strong> 高度对等，方向判断能力良好。</div></div>
+    <div class="icard"><div class="iicon">⚠️</div><div class="ititle y">持仓行为：止损可能过紧</div><div class="ibody">盈利单持仓 <strong>69.3 分钟</strong>，亏损单 <strong>45.7 分钟</strong>。亏损单反而更快平仓，可能是止损设置过紧导致频繁被扫，而非主动拖延止损。</div></div>
+    <div class="icard"><div class="iicon">🔴</div><div class="ititle r">仓位管理：波动极大</div><div class="ibody">单笔极差高达 <strong>$31,377</strong>（最大盈 $16,442 / 最大亏 -$14,935），仓位管理高度不一致，部分交易远超 2% 安全线。</div></div>
+    <div class="icard"><div class="iicon">📉</div><div class="ititle y">月度趋势：胜率持续下降</div><div class="ibody">2026-01 胜率 <strong>70.8%</strong> → 2026-06 仅 <strong>48.9%</strong>，下滑明显。3月交易 <strong>864 笔</strong>频次最高，需排查过度交易问题。</div></div>
+    <div class="icard"><div class="iicon">🛡️</div><div class="ititle g">安全护栏：有效运行</div><div class="ibody">通过确定性正则规则在 <strong>&lt;1ms</strong> 内拦截"加仓摊平"、"扛单"、"马丁格尔"等赌徒谬误，实现零信任双层安全过滤。</div></div>
+    <div class="icard"><div class="iicon">📊</div><div class="ititle g">MCP 数据层：完全解耦</div><div class="ibody">Agent 通过 MCP 协议访问 <strong>3,225 条真实交易</strong>与 <strong>173,391 条 M1 K线</strong>，数据层与 AI 逻辑完全分离，替换 Broker API 只需修改 MCP Server。</div></div>
+  </div>
+</div>
+
+<div class="footer">Trading Risk Coach · Kaggle × Google AI Agents Capstone · Real MT5 Data · Google ADK + FastMCP</div>
+
+<script>
+const gx = { ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} };
+const opts = { plugins:{ legend:{ labels:{ color:'#94a3b8', font:{size:11} } } }, scales:{x:gx,y:gx} };
+
+// Monthly PnL
+new Chart('c1',{ type:'bar', data:{
+  labels:['2025-11','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'],
+  datasets:[{ label:'净盈亏 ($)',
+    data:[5.9,71459,50677,52035,28222,31183,21431],
+    backgroundColor:['rgba(16,185,129,0.3)','rgba(16,185,129,0.8)','rgba(16,185,129,0.8)',
+      'rgba(16,185,129,0.8)','rgba(16,185,129,0.7)','rgba(16,185,129,0.7)','rgba(16,185,129,0.6)'],
+    borderColor:'#10b981', borderWidth:1, borderRadius:6 }]
+}, options:{...opts, plugins:{legend:{display:false}}} });
+
+// PnL Distribution
+new Chart('c2',{ type:'bar', data:{
+  labels:['<-1K','-1K~-500','-500~-200','-200~0','0~200','200~500','500~1K','>1K'],
+  datasets:[{ label:'笔数', data:[148,240,294,651,720,653,338,181],
+    backgroundColor:['#ef4444cc','#f87171cc','#fca5a5cc','#fcd34dcc','#86efaccc','#34d399cc','#10b981cc','#059669cc'],
+    borderRadius:5, borderSkipped:false }]
+}, options:{...opts, plugins:{legend:{display:false}}} });
+
+// Win Rate
+new Chart('c3',{ type:'line', data:{
+  labels:['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'],
+  datasets:[
+    { label:'月度胜率(%)', data:[70.8,66.3,57.5,66.3,53.0,48.9],
+      borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', fill:true, tension:0.4, pointRadius:5, pointBackgroundColor:'#3b82f6' },
+    { label:'50% 基准线', data:[50,50,50,50,50,50],
+      borderColor:'rgba(239,68,68,0.5)', borderDash:[5,5], pointRadius:0 }
+  ]
+}, options:opts });
+
+// Structure Doughnut
+new Chart('c4',{ type:'doughnut', data:{
+  labels:['盈利单 1,890','亏损单 1,335'],
+  datasets:[{ data:[1890,1335],
+    backgroundColor:['rgba(16,185,129,0.8)','rgba(239,68,68,0.7)'],
+    borderColor:['#10b981','#ef4444'], borderWidth:2 }]
+}, options:{ plugins:{ legend:{ position:'bottom', labels:{color:'#94a3b8',padding:10} } }, cutout:'65%' } });
+
+// Hold Time
+new Chart('c5',{ type:'bar', data:{
+  labels:['盈利单','亏损单'],
+  datasets:[{ label:'平均持仓（分钟）', data:[69.3,45.7],
+    backgroundColor:['rgba(16,185,129,0.7)','rgba(239,68,68,0.7)'],
+    borderColor:['#10b981','#ef4444'], borderWidth:2, borderRadius:8 }]
+}, options:{ ...opts, indexAxis:'y', plugins:{legend:{display:false}} } });
+</script>
+</body>
+</html>
