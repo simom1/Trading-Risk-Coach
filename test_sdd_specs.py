@@ -9,7 +9,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from trading_risk_coach.guardrails.safety_rules import sanitize_advice, contains_dangerous_advice
 from trading_risk_coach.mcp_server.trade_data_server import (
     execute_risk_mitigation,
-    get_platform_summary,
+    get_account_stats,
+    get_symbol_breakdown,
     get_recent_trades,
     get_symbol_history,
 )
@@ -66,21 +67,28 @@ def run_sdd_assertions():
     assert "继续扛单" not in sanitized_2, "Guardrail leaked the original unsafe phrase!"
     print("  [Pass] Guardrail successfully intercepted the Position Holding pattern.")
 
-    # 3. Asserting Scenario: MCP Read Tools Return Valid JSON
-    print("\nAsserting MCP read tools return valid JSON payloads")
-    recent = json.loads(get_recent_trades(days=7))
+    # 3. Asserting Scenario: MCP Read Tools Return Valid JSON (real data)
+    print("\nAsserting MCP read tools return valid JSON payloads (real MT5 data)")
+    recent = json.loads(get_recent_trades(days=30))
     assert isinstance(recent, list), "Recent trades should be a JSON list!"
     assert len(recent) > 0, "Recent trades should not be empty!"
-    assert {"symbol", "platform", "pnl"}.issubset(recent[0].keys()), "Recent trade record missing expected fields!"
+    assert {"symbol", "open_price", "close_price", "pnl"}.issubset(recent[0].keys()), "Recent trade record missing expected fields!"
 
     symbol_history = json.loads(get_symbol_history("XAUUSD"))
     assert len(symbol_history) > 0, "Symbol history should not be empty for XAUUSD!"
     assert all(row["symbol"].upper() == "XAUUSD" for row in symbol_history), "Symbol history returned wrong symbol!"
 
-    platform_summary = json.loads(get_platform_summary("ANZO"))
-    assert platform_summary["platform"] == "ANZO", "Platform summary returned wrong platform!"
-    assert "win_rate_pct" in platform_summary, "Platform summary missing win rate!"
-    print("  [Pass] MCP read tools returned valid records and summaries.")
+    account_stats = json.loads(get_account_stats(symbol="XAUUSD", days=90))
+    assert "win_rate_pct" in account_stats, "Account stats missing win rate!"
+    assert "disposition_effect_ratio" in account_stats, "Account stats missing disposition effect ratio!"
+    assert "sl_rate_pct" in account_stats, "Account stats missing stop-loss rate!"
+    print(f"  Real account stats: win_rate={account_stats['win_rate_pct']}%, disposition_ratio={account_stats['disposition_effect_ratio']}, total_trades={account_stats['total_trades']}")
+
+    breakdown = json.loads(get_symbol_breakdown())
+    assert "XAUUSD" in breakdown, "Symbol breakdown missing XAUUSD!"
+    assert "win_rate_pct" in breakdown["XAUUSD"], "Symbol breakdown missing win rate for XAUUSD!"
+    print(f"  Symbol breakdown: {list(breakdown.keys())}")
+    print("  [Pass] MCP read tools returned valid records and summaries (real MT5 data).")
     
     # 4. Asserting Scenario: Execute Active Stop Loss Mitigation
     ticket_id = "T1001"

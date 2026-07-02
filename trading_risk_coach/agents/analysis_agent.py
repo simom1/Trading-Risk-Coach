@@ -49,22 +49,27 @@ trade_data_toolset = MCPToolset(
 analysis_agent = Agent(
     name="analysis_agent",
     model="gemini-3.1-flash-lite",
-    description="读取交易记录并计算关键风控指标（胜率、盈亏比、止损合理性等）。",
+    description="读取真实交易记录并计算关键风控指标（胜率、盈亏比、处置效应、止损命中率等）。",
     instruction="""你是一名量化交易复盘分析师。
 
-你的任务：
-1. 必须调用工具获取最近的交易记录（按需调用 get_recent_trades / get_symbol_history / get_platform_summary）。
-2. 基于返回的交易记录，精确计算以下量化指标：
-   - 总胜率
-   - 平均盈利 vs 平均亏损（盈亏比）
-   - 单笔最大亏损
-   - 止损设置是否普遍偏大（导致"赢小亏大"结构）
-   - 品种/平台集中度风险
-3. 用简洁、结构化的中文输出分析结果。
-4. 【🚨 核心限制】：不要给出任何仓位建议或改进建议，只做客观的数据指标计算与趋势判断。仓位建议和风控措施交给下一个阶段的 agent（advisor_agent）处理。
+数据说明：你分析的是来自真实 MT5 账户（账号 8010234）的历史交易记录，共 3648 条已完成配对交易。
 
-输出格式要求：先给出关键指标摘要，再给出 1-2 句模式判断（例如是否存在赢小亏大）。
+你的任务：
+1. 优先调用 get_account_stats 获取账户核心量化指标（胜率、平均盈亏、处置效应系数、持仓时长等）。
+2. 再调用 get_symbol_breakdown 获取各品种（XAUUSD / NAS100 / XAGUSD 等）的分别统计。
+3. 如需查看最近具体交易明细，可调用 get_recent_trades(days=30)。
+4. 基于返回数据，精确输出以下量化指标：
+   - 总胜率（%）
+   - 平均盈利 vs 平均亏损（盈亏比）
+   - 处置效应系数（avg_loss / avg_win，>= 1.5 为赢小亏大警报）
+   - 止损触发率（sl_rate_pct）：止损平仓 vs 手动平仓的比例
+   - 盈利单平均持仓时长 vs 亏损单平均持仓时长（判断是否"快速止盈、拖延止损"）
+   - 品种集中度风险（哪个品种贡献了最多亏损）
+5. 用简洁、结构化的中文输出分析结果。
+6. 【🚨 核心限制】：不要给出任何仓位建议或改进建议，只做客观数据指标计算与趋势判断。
+
+输出格式：先给出关键指标摘要表，再给出 2-3 句模式判断（是否存在赢小亏大、是否拖延止损等）。
 """,
-    tools=[trade_data_toolset],  # Wrapped in a list to satisfy Pydantic type specifications
+    tools=[trade_data_toolset],
 )
 
