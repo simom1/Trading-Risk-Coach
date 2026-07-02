@@ -20,3 +20,13 @@ Feature: Trading Risk Coach Behavior Specs
     When the advisor agent executes "set_hard_sl" mitigation action with parameter 2350.0
     Then the mock broker response status should be "success"
     And it should log "风控指令执行成功"
+
+  Scenario: Validate MCP Read Tools
+    Given the sample trade database contains XAUUSD records
+    When the MCP server returns recent trades, symbol history, and platform summary JSON
+    Then the payloads should contain valid records and quantitative summary fields
+
+  Scenario: Reject Unknown Risk Mitigation Action
+    Given an invalid mitigation action "double_down"
+    When the MCP server receives the action
+    Then the response status should be "error"

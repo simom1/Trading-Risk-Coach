@@ -1,88 +1,206 @@
-# Trading Risk Coach 🚀
-**Kaggle × Google AI Agents Capstone Project — Agents for Business Track**
+# Trading Risk Coach
 
-An AI-first, behavior-driven **Trading Review & Active Risk Copilot** built with the Google Agent Development Kit (ADK) and Model Context Protocol (MCP). It helps personal traders identify harmful psychological anomalies (like the Disposition Effect), quantifies portfolio risk metrics (VaR/CVaR), and enforces strict, deterministic safety limits on trade suggestions.
+**Kaggle x Google AI Agents Capstone Project - Agents for Business Track**
 
----
+Trading Risk Coach is an AI-first, behavior-driven **Trading Review and Active Risk Copilot** built with the Google Agent Development Kit (ADK) and Model Context Protocol (MCP). It helps personal traders review historical trade behavior, identify harmful psychological risk patterns such as the Disposition Effect, and apply deterministic safety rules before any advice reaches the user.
 
-## 1. Project Architecture & Workflow (系统架构)
+The project is framed as a risk-control and trade-review system, not as an investment recommendation engine.
 
-This project implements a **three-agent risk-control desk** utilizing a multi-agent orchestration pipeline:
+## Problem
+
+Personal traders often lose money not only because of market direction, but because of repeated behavior patterns:
+
+- Taking profits too early while allowing losses to grow.
+- Trading without hard stop losses.
+- Concentrating too much exposure in one symbol or platform.
+- Following dangerous recovery logic such as averaging down, holding losing trades, or Martingale sizing.
+
+Trading Risk Coach converts these behaviors into measurable risk signals, routes them through a multi-agent workflow, and blocks unsafe advice through deterministic guardrails.
+
+## Architecture
+
+The system implements an Observe -> Think -> Act -> Audit loop:
 
 ```mermaid
 graph TD
-    Start([Start Input]) --> AnalysisAgent[analysis_agent<br>Calculates Win-Rate, R:R, & Anomalies]
-    AnalysisAgent --> AdvisorAgent[advisor_agent<br>Evaluates Risk vs. SKILL.md Criteria]
-    AdvisorAgent -->|Execute Wind-down Action| MCPServer[trade_data_server.py<br>FastMCP Broker Simulator]
-    AdvisorAgent --> CriticAgent[critic_agent<br>Audits Report & Formats Risk State]
-    CriticAgent --> GuardrailHook{after_model_callback<br>Guardrail Interceptor}
-    GuardrailHook -- Matches Danger Keywords --> Sanitize[safety_rules.py<br>Intercepts & Sanitizes Output]
-    GuardrailHook -- Safe Output --> End([Final Safe Advisory Output])
-    Sanitize --> End
-    
-    subgraph MCP Data Connection
-        AnalysisAgent <-->|Stdio / MCP| MCPServer
-        MCPServer <--> CSV[sample_trades.csv<br>40+ Realistic Gold Trades]
-    end
+    User[User risk review request] --> Root[ADK root_agent workflow]
+    Root --> Analysis[analysis_agent]
+    Analysis --> MCPRead[MCP tools: get_recent_trades, get_symbol_history, get_platform_summary]
+    MCPRead --> CSV[sample_trades.csv]
+    Analysis --> Advisor[advisor_agent]
+    Advisor --> Skill[SKILL.md quantitative risk rules]
+    Advisor --> MCPWrite[MCP tool: execute_risk_mitigation]
+    Advisor --> Guardrail[safety_rules.py after_model_callback]
+    Guardrail --> Critic[critic_agent]
+    Critic --> Report[Final quantitative risk report]
 ```
 
----
+More detail: [ARCHITECTURE.md](ARCHITECTURE.md)
 
-## 2. Advanced Architectural Concepts (学术级架构特征)
+## Agent Workflow
 
-Following best practices from top-tier open-source systems, we implement three core structural features:
+| Stage | File | Responsibility |
+| --- | --- | --- |
+| Root orchestration | `trading_risk_coach/agent.py` | Defines the ADK workflow edges from analysis to advisor to critic. |
+| Analysis Agent | `trading_risk_coach/agents/analysis_agent.py` | Reads trade data through MCP tools and computes quantitative risk metrics. |
+| Advisor Agent | `trading_risk_coach/agents/advisor_agent.py` | Loads `SKILL.md`, evaluates rule thresholds, and calls active mitigation tools when needed. |
+| Critic Agent | `trading_risk_coach/agents/critic_agent.py` | Audits the final response for quantitative evidence, professional formatting, and risk-state clarity. |
+| Safety Guardrail | `trading_risk_coach/guardrails/safety_rules.py` | Uses deterministic regex checks to block unsafe trading language. |
+| MCP Server | `trading_risk_coach/mcp_server/trade_data_server.py` | Provides stdio MCP tools for data reads and simulated broker risk actions. |
 
-### 🏛️ A. Three-Agent Quality Assurance Loop (Critic Node)
-Inspired by the *Predict Pro* architecture, the pipeline includes `critic_agent`. Chained after `advisor_agent`, the Critic audits the generated text to guarantee it references exact quantitative metrics (ratios, win rate) and formats the output into a standardized risk layout.
+## Kaggle Rubric Mapping
 
-### 🚦 B. Three-Value Risk Logic (三态风控执行)
-To minimize unnecessary trading fees (slippage and broker commission), we implement a three-state evaluation paradigm from *Preventing Flash Crashes*:
-*   🟢 **Green (Safe)**: All positions have stop losses; risk is <= 1.0%. Keep watching.
-*   🟡 **Yellow (Watch)**: Position missing stop loss, but market volatility is low. Action: Automatically attach a stop loss. **Do not close** the trade.
-*   🔴 **Red (Breaker)**: Drawdown is critical (>5%) or market volatility spikes. Action: Execute immediate emergency market closure.
+| Rubric requirement | Implementation evidence | Verification evidence |
+| --- | --- | --- |
+| ADK Agent and Multi-Agent workflow | `trading_risk_coach/agent.py` defines `root_agent` with `analysis_agent -> advisor_agent -> critic_agent`. | `python test_runner.py` imports the workflow and prints the registered edges. |
+| MCP Server over stdio | `trading_risk_coach/mcp_server/trade_data_server.py` exposes FastMCP tools; `analysis_agent.py` connects with `MCPToolset` and `StdioConnectionParams`. | `python test_sdd_specs.py` validates MCP JSON read/write behavior and active mitigation execution. |
+| Agent Skills | `trading_risk_coach/skills/risk_pattern_detection/SKILL.md` defines the Disposition Effect threshold, position risk limit, and three-state risk logic. | `python test_sdd_specs.py` parses `SKILL.md` and asserts the threshold is used by behavior tests. |
+| Security Features | `trading_risk_coach/guardrails/safety_rules.py` blocks dangerous advice such as averaging down, holding losses, all-in, and Martingale logic. | `python test_sdd_specs.py` asserts dangerous text is replaced and the original unsafe advice is not leaked. |
+| Deployability | `Dockerfile` and `requirements.txt` provide a container-ready runtime. | `docker build -t trading-risk-coach .` can run the same behavior test suite through the default container command. |
 
-### ⚡ C. Fast Lane vs. Governance Lane (双轨治理)
-*   **Fast Lane (确定性快速通道)**: Implemented in [safety_rules.py](trading_risk_coach/guardrails/safety_rules.py) via Python regex checks. Runs in < 1ms to act as a **Circuit Breaker (熔断器)** blocking gambling fallacies.
-*   **Governance Lane (异步治理通道)**: Implemented in the ADK agent chain, using Gemini for long-term behavior profiling.
+## Demo Scenario
 
----
+Full demo walkthrough: [DEMO.md](DEMO.md)
 
-## 3. Setup & Running Instructions (本地复现与运行)
+Example user request:
 
-### Prerequisites:
+```text
+Please analyze my recent XAUUSD trading behavior and tell me whether I am taking unsafe recovery risk.
+```
+
+Expected flow:
+
+1. `analysis_agent` calls MCP tools to load recent trades.
+2. It computes core metrics such as win rate, average win, average loss, and loss/win ratio.
+3. `advisor_agent` compares the metrics against `SKILL.md`.
+4. If an active order is missing a stop loss, it calls `execute_risk_mitigation`.
+5. `safety_rules.py` blocks any unsafe recovery advice.
+6. `critic_agent` produces a final structured risk report.
+
+## Test Evidence
+
+Run the behavior-driven verification suite:
+
+```bash
+python test_sdd_specs.py
+```
+
+Current verified coverage:
+
+- Disposition Effect threshold from `SKILL.md`.
+- Guardrail interception of averaging-down and holding-loss language.
+- Sanitized output does not leak the original dangerous suggestion.
+- MCP read tools return valid JSON records and summaries.
+- MCP write tool supports `set_hard_sl` and rejects invalid action types.
+
+Run the local ADK smoke test:
+
+```bash
+python test_runner.py
+```
+
+This verifies that the ADK workflow imports successfully and that the guardrail sanitizer works independently from a live model call.
+
+## Model and Dependency Stability
+
+The agents use:
+
+```python
+model="gemini-3.1-flash-lite"
+```
+
+Google AI model documentation lists [`gemini-3.1-flash-lite`](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite) as a stable Gemini API model string. Dependencies are pinned in `requirements.txt` to the versions used during local verification:
+
+```text
+google-adk==2.3.0
+mcp==1.28.1
+pandas==3.0.3
+python-dotenv==1.2.2
+```
+
+## Setup
+
+Prerequisites:
+
 - Python 3.11+
-- A Gemini API Key from Google AI Studio.
+- Gemini API key from Google AI Studio
 
-### Installation:
-1.  **Create and activate a virtual environment:**
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # Windows: venv\Scripts\activate
-    ```
-2.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-3.  **Set up your environment variables:**
-    ```bash
-    cp .env.example .env
-    # Edit .env and enter your GEMINI_API_KEY
-    ```
+Install:
 
-### Running the App:
-*   **Run Automated Behavior Tests (SDD verification):**
-    ```bash
-    python test_sdd_specs.py
-    ```
-*   **Run Local Validation Runner:**
-    ```bash
-    python test_runner.py
-    ```
-*   **Launch Agent in TUI Console:**
-    ```bash
-    adk run trading_risk_coach
-    ```
-*   **Launch Agent Web UI Client:**
-    ```bash
-    adk web trading_risk_coach
-    ```
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+Add your Gemini key to `.env`.
+
+Run tests:
+
+```bash
+python test_sdd_specs.py
+python test_runner.py
+```
+
+Run the ADK app:
+
+```bash
+adk run trading_risk_coach
+```
+
+Or launch the ADK web client:
+
+```bash
+adk web trading_risk_coach
+```
+
+## Docker
+
+Build:
+
+```bash
+docker build -t trading-risk-coach .
+```
+
+Run default health verification:
+
+```bash
+docker run --rm trading-risk-coach
+```
+
+Override the command for ADK web runtime:
+
+```bash
+docker run --rm -p 8080:8080 --env-file .env trading-risk-coach adk web trading_risk_coach --host 0.0.0.0 --port 8080
+```
+
+## Repository Layout
+
+```text
+trading-risk-coach/
+├── ARCHITECTURE.md
+├── DEMO.md
+├── Dockerfile
+├── README.md
+├── frontend/
+├── project_introduction.html
+├── requirements.txt
+├── scratch/
+├── specs/
+├── test_runner.py
+├── test_sdd_specs.py
+└── trading_risk_coach/
+    ├── agent.py
+    ├── agents/
+    ├── data/
+    ├── guardrails/
+    ├── mcp_server/
+    └── skills/
+```
+
+Note: `scratch/` contains exploratory analysis and migration utilities. It is not required for the runtime path or Kaggle rubric verification.
+
+## Safety Scope
+
+Trading Risk Coach is an educational risk-review system. It does not provide financial advice, predict market direction, or recommend entries. Its safety layer is intentionally conservative and blocks recovery-trading language before it reaches the user interface.

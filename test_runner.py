@@ -6,13 +6,27 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from trading_risk_coach.agent import root_agent
-from google.adk.models import LlmResponse
-from google.adk.agents.callback_context import CallbackContext
+from trading_risk_coach.agents.analysis_agent import analysis_agent
+from trading_risk_coach.agents.advisor_agent import advisor_agent
+from trading_risk_coach.agents.critic_agent import critic_agent
 from trading_risk_coach.guardrails.safety_rules import sanitize_advice
 
 print("ADK workflow loaded successfully!")
 print(f"Workflow Name: {root_agent.name}")
-print(f"Edges: {root_agent.edges}")
+
+edge_names = []
+for source, target in root_agent.edges:
+    source_name = source if isinstance(source, str) else source.name
+    target_name = target if isinstance(target, str) else target.name
+    edge_names.append(f"{source_name} -> {target_name}")
+
+print("Workflow Edges:")
+for edge_name in edge_names:
+    print(f"  - {edge_name}")
+
+print("Agent Models:")
+for agent in [analysis_agent, advisor_agent, critic_agent]:
+    print(f"  - {agent.name}: {agent.model}")
 
 # Create a mock response to test the guardrail callback directly
 class MockResponse:
@@ -36,7 +50,7 @@ async def test_guardrail():
     if "[安全护栏已拦截原始建议]" in sanitized_danger:
         print("\n✅ Guardrail successfully intercepted and blocked the gambler's fallacy advice!")
     else:
-        print("\n❌ Guardrail failed to intercept the advice!")
+        raise AssertionError("Guardrail failed to intercept the advice!")
 
 if __name__ == "__main__":
     asyncio.run(test_guardrail())

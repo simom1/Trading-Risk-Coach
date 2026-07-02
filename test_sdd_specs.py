@@ -7,7 +7,14 @@ import json
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from trading_risk_coach.guardrails.safety_rules import sanitize_advice, contains_dangerous_advice
-from trading_risk_coach.mcp_server.trade_data_server import execute_risk_mitigation
+from trading_risk_coach.mcp_server.trade_data_server import (
+    execute_risk_mitigation,
+    get_platform_summary,
+    get_recent_trades,
+    get_symbol_history,
+)
+
+SKILL_PATH = "trading_risk_coach/skills/risk_pattern_detection/SKILL.md"
 
 def parse_gherkin_feature(file_path):
     print(f"Reading behavior specs from: {file_path}")
@@ -18,6 +25,13 @@ def parse_gherkin_feature(file_path):
         if stripped.startswith("Scenario:") or stripped.startswith("Given") or stripped.startswith("When") or stripped.startswith("Then") or stripped.startswith("And"):
             print(f"  [SDD Step] {stripped}")
 
+def load_disposition_threshold():
+    with open(SKILL_PATH, "r", encoding="utf-8") as f:
+        skill_text = f.read()
+    match = re.search(r"Ratio\s*>=\s*([0-9.]+)", skill_text)
+    assert match, "Could not find Disposition Effect threshold in SKILL.md"
+    return float(match.group(1))
+
 def run_sdd_assertions():
     feature_path = "specs/behavior_rules.feature"
     parse_gherkin_feature(feature_path)
@@ -25,12 +39,13 @@ def run_sdd_assertions():
     print("\n--- Running Behavior-Driven Spec Assertions ---")
     
     # 1. Asserting Scenario: Detect Disposition Effect (Win Small Lose Big)
-    # Threshold defined in SKILL.md is 1.5. Let's assert calculations with mock metrics.
+    # Threshold is intentionally loaded from SKILL.md to keep tests aligned with the Agent Skill.
+    threshold = load_disposition_threshold()
     avg_loss = 95.0
     avg_win = 35.0
     ratio = avg_loss / avg_win
-    print(f"Asserting Win-Small-Lose-Big threshold: {ratio:.2f} >= 1.5")
-    assert ratio >= 1.5, "Ratio calculation assertion failed!"
+    print(f"Asserting Win-Small-Lose-Big threshold from SKILL.md: {ratio:.2f} >= {threshold}")
+    assert ratio >= threshold, "Ratio calculation assertion failed!"
     print("  [Pass] Threshold calculation conforms to SKILL.md definition.")
     
     # 2. Asserting Scenario: Prevent Gambler Fallacy Advice
@@ -41,15 +56,33 @@ def run_sdd_assertions():
     assert contains_dangerous_advice(dangerous_input_1) == True, "Failed to identify dangerous advice!"
     sanitized_1 = sanitize_advice(dangerous_input_1)
     assert "[安全护栏已拦截原始建议]" in sanitized_1, "Guardrail failed to insert security warning!"
+    assert "加仓摊平成本" not in sanitized_1, "Guardrail leaked the original unsafe phrase!"
     print("  [Pass] Guardrail successfully intercepted the Averaging Down pattern.")
     
     print(f"\nAsserting Guardrail Interceptor with input: '{dangerous_input_2}'")
     assert contains_dangerous_advice(dangerous_input_2) == True, "Failed to identify dangerous advice!"
     sanitized_2 = sanitize_advice(dangerous_input_2)
     assert "[安全护栏已拦截原始建议]" in sanitized_2, "Guardrail failed to insert security warning!"
+    assert "继续扛单" not in sanitized_2, "Guardrail leaked the original unsafe phrase!"
     print("  [Pass] Guardrail successfully intercepted the Position Holding pattern.")
+
+    # 3. Asserting Scenario: MCP Read Tools Return Valid JSON
+    print("\nAsserting MCP read tools return valid JSON payloads")
+    recent = json.loads(get_recent_trades(days=7))
+    assert isinstance(recent, list), "Recent trades should be a JSON list!"
+    assert len(recent) > 0, "Recent trades should not be empty!"
+    assert {"symbol", "platform", "pnl"}.issubset(recent[0].keys()), "Recent trade record missing expected fields!"
+
+    symbol_history = json.loads(get_symbol_history("XAUUSD"))
+    assert len(symbol_history) > 0, "Symbol history should not be empty for XAUUSD!"
+    assert all(row["symbol"].upper() == "XAUUSD" for row in symbol_history), "Symbol history returned wrong symbol!"
+
+    platform_summary = json.loads(get_platform_summary("ANZO"))
+    assert platform_summary["platform"] == "ANZO", "Platform summary returned wrong platform!"
+    assert "win_rate_pct" in platform_summary, "Platform summary missing win rate!"
+    print("  [Pass] MCP read tools returned valid records and summaries.")
     
-    # 3. Asserting Scenario: Execute Active Stop Loss Mitigation
+    # 4. Asserting Scenario: Execute Active Stop Loss Mitigation
     ticket_id = "T1001"
     action = "set_hard_sl"
     sl_price = 2350.0
@@ -64,6 +97,10 @@ def run_sdd_assertions():
     
     print(f"Broker Response: {broker_resp['message']}")
     print("  [Pass] Advisor Agent successfully executed active Stop-Loss command on Mock Broker.")
+
+    invalid_resp = json.loads(execute_risk_mitigation("double_down", ticket_id, sl_price))
+    assert invalid_resp["status"] == "error", "Invalid mitigation action should fail safely!"
+    print("  [Pass] MCP write tool rejects unknown mitigation actions safely.")
 
     print("\n✅ All Spec-Driven Development (SDD) behavior tests PASSED!")
 
