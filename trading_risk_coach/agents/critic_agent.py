@@ -18,12 +18,27 @@ from the Advisor Agent to ensure they are quantitative, professional, and contai
 """
 
 from google.adk import Agent
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.models import LlmResponse
+from trading_risk_coach.guardrails.safety_rules import sanitize_advice
+
+
+async def safety_guardrail_callback(callback_context: CallbackContext, llm_response: LlmResponse, **kwargs) -> LlmResponse:
+    """Apply the deterministic safety filter to the final critic output."""
+    if hasattr(llm_response, "text") and llm_response.text is not None:
+        llm_response.text = sanitize_advice(llm_response.text)
+    elif llm_response.content and llm_response.content.parts:
+        for part in llm_response.content.parts:
+            if part.text:
+                part.text = sanitize_advice(part.text)
+    return llm_response
 
 # Define the Critic Agent
 critic_agent = Agent(
     name="critic_agent",
     model="gemini-3.1-flash-lite",
     description="对风控建议进行审计与格式化，确保建议具备严谨的数据指标支撑。",
+    after_model_callback=safety_guardrail_callback,
     instruction="""你是一名风控审查员（Critic Agent）。
 
 你的任务：

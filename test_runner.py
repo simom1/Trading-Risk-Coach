@@ -28,6 +28,12 @@ print("Agent Models:")
 for agent in [analysis_agent, advisor_agent, critic_agent]:
     print(f"  - {agent.name}: {agent.model}")
 
+assert advisor_agent.after_model_callback is not None, "Advisor guardrail callback is not registered!"
+assert critic_agent.after_model_callback is not None, "Critic guardrail callback is not registered!"
+print("Guardrail Callbacks:")
+print("  - advisor_agent: registered")
+print("  - critic_agent: registered")
+
 # Create a mock response to test the guardrail callback directly
 class MockResponse:
     def __init__(self, text):

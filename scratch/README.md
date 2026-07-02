@@ -1,8 +1,8 @@
 # Scratch Utilities
 
-This directory contains exploratory scripts and migration helpers used during project development.
+This directory is intentionally kept as a placeholder for local-only exploratory scripts.
 
-These files are **not required** for the core Kaggle Capstone runtime path:
+Exploratory scripts are **not required** for the core Kaggle Capstone runtime path:
 
 ```text
 ADK root_agent
@@ -13,14 +13,15 @@ ADK root_agent
 -> critic_agent
 ```
 
-## Contents
+## Policy
 
-| File group | Purpose |
-| --- | --- |
-| `analyze_*.py` | Local exploratory analysis of trade statements and daily summaries. |
-| `generate_*.py` | One-off HTML/chart generation helpers used for presentation assets. |
-| `patch_*.py` | Experimental patch utilities for external platform integration. |
-| `test_paramiko_ssh.py` | SSH connectivity experiment, not part of the ADK/MCP runtime. |
+Local scratch scripts often contain machine-specific paths, local report locations, or private integration experiments. They are intentionally ignored by Git through:
+
+```text
+scratch/*.py
+```
+
+Only this README is kept in the repository so reviewers understand that `scratch/` is outside the runtime and rubric verification path.
 
 ## Review Note
 

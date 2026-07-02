@@ -182,6 +182,7 @@ trading-risk-coach/
 ├── ARCHITECTURE.md
 ├── DEMO.md
 ├── Dockerfile
+├── KAGGLE_WRITEUP.md
 ├── README.md
 ├── frontend/
 ├── project_introduction.html
@@ -199,7 +200,7 @@ trading-risk-coach/
     └── skills/
 ```
 
-Note: `scratch/` contains exploratory analysis and migration utilities. It is not required for the runtime path or Kaggle rubric verification.
+Note: `scratch/` is reserved for local-only exploratory utilities. Python scripts under that directory are ignored so machine-specific paths and private integration experiments do not enter the repository.
 
 ## Safety Scope
 

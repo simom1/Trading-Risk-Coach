@@ -15,6 +15,10 @@ __pycache__/
 .pytest_cache/
 .adk/
 
+# Local exploratory scripts with machine-specific paths
+scratch/*.py
+!scratch/README.md
+
 # System files
 .DS_Store
 Thumbs.db
