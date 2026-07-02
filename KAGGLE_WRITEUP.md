@@ -11,7 +11,7 @@ This project uses **real market data** from two sources:
 
 | Data | File | Description |
 | --- | --- | --- |
-| Real trade history | `real_trades.csv` | 3,648 paired open/close trades from real MT5 account 8010234, covering XAUUSD, NAS100, XAGUSD, US30 (Nov 2025 – Jul 2026) |
+| Real trade history | `real_trades.csv` | 3,225 paired open/close XAUUSD trades from real MT5 account 8010234 (Nov 2025 – Jun 2026), win rate 58.6% |
 | Real market prices | `XAUUSD_M1.csv` | 173,391 rows of XAUUSD 1-minute OHLCV candles (Jan – Jul 2026, price range 3942–5597) |
 
 ## 1. Product Background and Problem
