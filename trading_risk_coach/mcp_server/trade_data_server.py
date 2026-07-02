@@ -23,6 +23,7 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 DATA_PATH = Path(__file__).parent.parent / "data" / "real_trades.csv"
+M1_PATH = Path(__file__).parent.parent / "data" / "XAUUSD_M1.csv"
 mcp = FastMCP("trade-data-server")
 
 
@@ -132,6 +133,46 @@ def get_symbol_breakdown() -> str:
             "avg_loss_usd": round(float(group[group["pnl"] < 0]["pnl"].mean()), 2) if len(group[group["pnl"] < 0]) > 0 else 0,
         }
     return json.dumps(result, ensure_ascii=False)
+
+
+@mcp.tool()
+def get_market_context(trade_time: str, window_minutes: int = 30) -> str:
+    """获取某笔交易时刻前后的 XAUUSD M1 市场行情（真实 K 线数据）。
+
+    Args:
+        trade_time: 交易时间字符串，格式 'YYYY-MM-DD HH:MM:SS'
+        window_minutes: 前后各取多少分钟的 K 线，默认 30 分钟
+    """
+    if not M1_PATH.exists():
+        return json.dumps({"error": "M1 market data not available."})
+
+    m1 = pd.read_csv(M1_PATH, parse_dates=["time"])
+    try:
+        center = pd.to_datetime(trade_time)
+    except Exception:
+        return json.dumps({"error": f"Invalid time format: {trade_time}"})
+
+    mask = (m1["time"] >= center - pd.Timedelta(minutes=window_minutes)) & \
+           (m1["time"] <= center + pd.Timedelta(minutes=window_minutes))
+    window = m1[mask].copy()
+
+    if window.empty:
+        return json.dumps({"error": f"No M1 data found around {trade_time}"})
+
+    # Compute ATR-like volatility: mean of (high - low) over the window
+    window["range"] = window["high"] - window["low"]
+    summary = {
+        "trade_time": trade_time,
+        "window_minutes": window_minutes,
+        "candles_found": int(len(window)),
+        "price_at_trade": float(m1[m1["time"] <= center].iloc[-1]["close"]) if not m1[m1["time"] <= center].empty else None,
+        "high_in_window": round(float(window["high"].max()), 2),
+        "low_in_window": round(float(window["low"].min()), 2),
+        "avg_candle_range_pts": round(float(window["range"].mean()), 2),
+        "volatility_assessment": "HIGH" if window["range"].mean() > 3.0 else "NORMAL",
+        "data_source": "XAUUSD_M1.csv (173K real candles, 2026-01 to 2026-07)",
+    }
+    return json.dumps(summary, ensure_ascii=False)
 
 
 @mcp.tool()

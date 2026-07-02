@@ -5,6 +5,15 @@
 
 > Trading Risk Coach is a trading behavior risk-review and de-biasing system. It is not an investment advice product, a signal generator, or a market prediction tool.
 
+## Data Sources
+
+This project uses **real market data** from two sources:
+
+| Data | File | Description |
+| --- | --- | --- |
+| Real trade history | `real_trades.csv` | 3,648 paired open/close trades from real MT5 account 8010234, covering XAUUSD, NAS100, XAGUSD, US30 (Nov 2025 – Jul 2026) |
+| Real market prices | `XAUUSD_M1.csv` | 173,391 rows of XAUUSD 1-minute OHLCV candles (Jan – Jul 2026, price range 3942–5597) |
+
 ## 1. Product Background and Problem
 
 Retail and small-account traders often lose money through repeated behavioral patterns rather than a lack of chart access. One common pattern is the Disposition Effect: taking small profits quickly while allowing losing trades to grow. Other high-risk patterns include trading without hard stop losses, concentrating risk in one symbol, and trying to recover losses through averaging down or Martingale-style sizing.
@@ -43,7 +52,14 @@ User risk-review request
 - `trading_risk_coach/agents/analysis_agent.py`: MCP-backed trade metric analysis.
 - `trading_risk_coach/agents/advisor_agent.py`: Skill-based risk diagnosis and active mitigation.
 - `trading_risk_coach/agents/critic_agent.py`: quantitative report audit and formatting.
-- `trading_risk_coach/mcp_server/trade_data_server.py`: FastMCP read/write tool server.
+- `trading_risk_coach/mcp_server/trade_data_server.py`: FastMCP server with 5 tools:
+  - `get_recent_trades` — recent trade records from real MT5 account
+  - `get_account_stats` — full quantitative metrics (disposition ratio, SL rate, hold time)
+  - `get_symbol_breakdown` — per-symbol PnL and win rate breakdown
+  - `get_market_context` — real M1 price context around any trade timestamp (volatility, ATR)
+  - `execute_risk_mitigation` — simulated broker risk actions with parameter validation
+- `trading_risk_coach/data/real_trades.csv`: 3,648 real MT5 trade records.
+- `trading_risk_coach/data/XAUUSD_M1.csv`: 173,391 real 1-minute XAUUSD candles.
 - `trading_risk_coach/skills/risk_pattern_detection/SKILL.md`: decoupled business rules.
 - `trading_risk_coach/guardrails/safety_rules.py`: deterministic safety guardrails.
 - `test_sdd_specs.py`: behavior-driven verification suite.
