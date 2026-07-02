@@ -357,7 +357,7 @@
     <header>
         <div class="logo-badge">Kaggle Capstone Project</div>
         <h1>Trading Risk Coach</h1>
-        <p class="subtitle">一款专为个人交易者研发的多智能体风控诊断与行为去偏副驾驶系统</p>
+        <p class="subtitle">一款专为个人交易者研发的多智能体风控诊断与行为去偏副驾驶系统，不提供投资建议，只做交易行为复盘与风险控制辅助。</p>
     </header>
 
     <!-- Section 1: Problems Solved -->
@@ -408,7 +408,7 @@
                         <p class="step-desc">对比行为金融学 Skill 规范，判定是否存在偏差，并针对高危活跃持仓触发风控干预。</p>
                         <div class="step-detail">
                             对应文件：<code>trading_risk_coach/agents/advisor_agent.py</code><br>
-                            逻辑：读取 <code>SKILL.md</code> 规范，若判定“盈亏比 < 1.5”则触发处置效应警报。若发现活跃持仓中存在未挂止损高危单，将直接调用风控工具（设置硬止损/紧急平仓），完成<b>Think & Act（思考与行动）</b>阶段。
+                            逻辑：读取 <code>SKILL.md</code> 规范，若判定“处置效应系数 = 平均亏损绝对值 / 平均盈利 >= 1.5”则触发赢小亏大警报。若发现活跃持仓中存在未挂止损高危单，将直接调用风控工具（设置硬止损/紧急平仓），完成<b>Think & Act（思考与行动）</b>阶段。
                         </div>
                     </div>
                 </div>
@@ -480,12 +480,47 @@
                 </tr>
                 <tr>
                     <td><b>Deployability</b></td>
-                    <td>提供了轻量化的 slim-Dockerfile，支持一键打包部署至 Google Cloud Run 云端平台。</td>
+                    <td>提供了轻量化的 slim-Dockerfile 与固定版本依赖，支持打包部署至 Cloud Run 风格的容器环境。</td>
                     <td><code>Dockerfile</code> & <code>requirements.txt</code></td>
                     <td><span class="badge-verified">Verified</span></td>
                 </tr>
             </tbody>
         </table>
+    </section>
+
+    <!-- Section 4: Verification Evidence -->
+    <section>
+        <h2 class="section-title"><span>#</span> 测试证据与可复现性 (Verification Evidence)</h2>
+        <div class="pain-grid">
+            <div class="card">
+                <div class="card-icon icon-blue">✓</div>
+                <h3 class="card-title">行为规格测试</h3>
+                <p class="card-desc"><code>python test_sdd_specs.py</code> 已验证 Skill 阈值读取、危险建议拦截、MCP 读写工具 JSON 输出、止损设置成功，以及非法风控动作安全失败。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-gold">↔</div>
+                <h3 class="card-title">ADK 工作流冒烟测试</h3>
+                <p class="card-desc"><code>python test_runner.py</code> 已确认 <code>START -> analysis_agent -> advisor_agent -> critic_agent</code> 工作流可导入，且三个 Agent 使用稳定模型 <code>gemini-3.1-flash-lite</code>。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-red">!</div>
+                <h3 class="card-title">安全边界</h3>
+                <p class="card-desc">项目定位为交易行为风控与复盘辅助系统，不预测市场、不推荐开仓、不构成投资建议。对“加仓回本、扛单、马丁格尔”等恢复性高危建议进行确定性替换。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Demo and Limitations -->
+    <section>
+        <h2 class="section-title"><span>#</span> Demo 场景与未来改进 (Demo & Roadmap)</h2>
+        <div class="flow-container">
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">示例输入：</p>
+            <p><code>Please review my recent XAUUSD trades and tell me whether I am showing win-small-lose-big behavior.</code></p>
+            <p style="color: var(--text-secondary); margin: 1.5rem 0 1rem;">系统预期执行链路：</p>
+            <p class="card-desc">MCP 读取交易流水 -> Analysis Agent 计算胜率/平均盈亏/处置效应系数 -> Advisor Agent 对照 <code>SKILL.md</code> 触发风控规则 -> 必要时调用 <code>execute_risk_mitigation</code> 设置硬止损 -> Guardrail 拦截危险恢复建议 -> Critic Agent 输出三态风控报告。</p>
+            <p style="color: var(--text-secondary); margin: 1.5rem 0 1rem;">局限性与未来方向：</p>
+            <p class="card-desc">当前经纪商执行层为模拟工具，样本数据为本地 CSV。后续可替换为真实券商/交易所 API、数据库型 MCP Server、组合级敞口汇总、更多回撤指标，以及面向风控人员的操作仪表盘。</p>
+        </div>
     </section>
 
     <!-- Footer -->
