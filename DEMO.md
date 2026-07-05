@@ -2,6 +2,8 @@
 
 This demo shows how Trading Risk Coach handles one complete risk-review request.
 
+For video recording, open `replay_demo.html` and click **开始演示**. The page automatically animates the data load, ADK workflow, MCP historical replay, guardrail check, and final report.
+
 ## Demo Input
 
 ```text

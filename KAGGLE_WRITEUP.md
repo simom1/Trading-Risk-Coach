@@ -95,7 +95,7 @@ Example MCP mitigation response:
 }
 ```
 
-An optional interactive visual summary is included in `dashboard.html`. It presents the before/after narrative, the real-data scale, the historical replay concept, and the ADK/MCP implementation path for a quick evaluator-friendly walkthrough.
+An optional click-to-run visual demo is included in `replay_demo.html`. It automatically walks through data loading, ADK agents, MCP historical replay, guardrail checks, and the final safe report. A separate `dashboard.html` presents the before/after narrative, the real-data scale, and the ADK/MCP implementation path for a quick evaluator-friendly walkthrough.
 
 ## 6. Security Mechanism
 

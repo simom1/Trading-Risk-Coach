@@ -74,6 +74,8 @@ More detail: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 Full demo walkthrough: [DEMO.md](DEMO.md)
 
+Click-to-run replay demo: [replay_demo.html](replay_demo.html)
+
 Interactive visual dashboard: [dashboard.html](dashboard.html)
 
 Example user request:
@@ -203,6 +205,7 @@ trading-risk-coach/
 ├── dashboard.html
 ├── frontend/
 ├── project_introduction.html
+├── replay_demo.html
 ├── requirements.txt
 ├── scratch/
 ├── specs/

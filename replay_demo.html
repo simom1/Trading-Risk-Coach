@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Risk Coach - Historical Replay Demo</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #d9e2ec;
+      --panel: #ffffff;
+      --page: #f3f6f8;
+      --blue: #2563eb;
+      --green: #059669;
+      --amber: #d97706;
+      --red: #dc2626;
+      --charcoal: #111827;
+      --code: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    .shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      min-height: 310px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 22px;
+    }
+
+    .hero-copy {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 58px);
+      line-height: 0.98;
+      letter-spacing: 0;
+      margin: 0 0 18px;
+      max-width: 820px;
+    }
+
+    .hero-copy p {
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 820px;
+      margin: 0;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+      align-items: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      background: var(--charcoal);
+      color: #fff;
+      padding: 12px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      min-height: 44px;
+    }
+
+    button.secondary {
+      color: var(--ink);
+      background: #e7edf3;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .status-pill {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      background: #fbfdff;
+    }
+
+    .hero-media {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #111827;
+      min-height: 310px;
+    }
+
+    .hero-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0.85;
+    }
+
+    .media-overlay {
+      position: absolute;
+      inset: auto 18px 18px 18px;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .media-overlay strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .media-overlay span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 112px;
+    }
+
+    .metric label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .metric .value {
+      font-size: 30px;
+      font-weight: 900;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric small {
+      display: block;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 58px;
+    }
+
+    .panel-head h2 {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .timeline {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      border: 1px solid #edf1f5;
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfdff;
+      transition: border-color 0.2s ease, background 0.2s ease;
+      min-height: 70px;
+    }
+
+    .step.active {
+      border-color: rgba(37,99,235,0.35);
+      background: #f3f7ff;
+    }
+
+    .step.done {
+      border-color: rgba(5,150,105,0.28);
+      background: #f2fbf7;
+    }
+
+    .step .num {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: #e7edf3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .step.active .num {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .step.done .num {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .step h3 {
+      margin: 0 0 3px;
+      font-size: 14px;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .main-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .terminal {
+      background: var(--code);
+      color: #d1d5db;
+      padding: 14px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      min-height: 236px;
+      max-height: 236px;
+      overflow: auto;
+    }
+
+    .line {
+      padding: 3px 0;
+      white-space: pre-wrap;
+    }
+
+    .line .time {
+      color: #94a3b8;
+      margin-right: 8px;
+    }
+
+    .line.info { color: #dbeafe; }
+    .line.ok { color: #bbf7d0; }
+    .line.warn { color: #fde68a; }
+    .line.red { color: #fecaca; }
+
+    .bars {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr) 42px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .bar-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .bar-track {
+      height: 14px;
+      background: #edf2f7;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      width: 0;
+      height: 100%;
+      transition: width 0.7s ease;
+    }
+
+    .bar-green { background: var(--green); }
+    .bar-amber { background: var(--amber); }
+    .bar-red { background: var(--red); }
+
+    .events {
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .event-card {
+      display: grid;
+      grid-template-columns: 100px minmax(0, 1fr) 120px;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfdff;
+      opacity: 0.35;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .event-card.visible {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    .ticket {
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .event-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge {
+      justify-self: end;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .badge.green { color: #064e3b; background: #d1fae5; }
+    .badge.amber { color: #7c2d12; background: #ffedd5; }
+    .badge.red { color: #7f1d1d; background: #fee2e2; }
+
+    .report {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .report-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      padding: 14px;
+      min-height: 132px;
+    }
+
+    .report-box h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .report-box p,
+    .report-box li {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .report-box ul {
+      margin: 8px 0 0 18px;
+      padding: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero-media {
+        min-height: 240px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        padding: 14px;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .event-card {
+        grid-template-columns: 1fr;
+      }
+
+      .badge {
+        justify-self: start;
+      }
+
+      .bar-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <div>
+          <div class="eyebrow">Kaggle Capstone Demo</div>
+          <h1>Historical Risk Replay</h1>
+          <p>
+            点击开始后，页面会自动演示 Trading Risk Coach 如何读取匿名化交易记录和真实 XAUUSD M1 行情，
+            再用 ADK 多智能体与 MCP 工具回放历史持仓路径，模拟硬止损、熔断和平稳观察动作。
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button id="startBtn">开始演示</button>
+          <button id="resetBtn" class="secondary">重置</button>
+          <span id="runState" class="status-pill">Ready: historical replay, not live broker execution</span>
+        </div>
+      </div>
+      <div class="hero-media">
+        <img src="cover.jpg" alt="Trading Risk Coach cover">
+        <div class="media-overlay">
+          <strong>安全边界</strong>
+          <span>当前版本不连接真实账户；主动风控是基于历史行情的 what-if 回放模拟。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Core metrics">
+      <div class="metric">
+        <label>Trade Records</label>
+        <div class="value" data-count="3225">0</div>
+        <small>paired XAUUSD trades</small>
+      </div>
+      <div class="metric">
+        <label>M1 Candles</label>
+        <div class="value" data-count="173391">0</div>
+        <small>real market candles</small>
+      </div>
+      <div class="metric">
+        <label>Win Rate</label>
+        <div class="value" data-count="55.8" data-suffix="%">0%</div>
+        <small>last 90 days replay window</small>
+      </div>
+      <div class="metric">
+        <label>Replay Actions</label>
+        <div class="value" data-count="9">0</div>
+        <small>7 hard stops + 2 breakers</small>
+      </div>
+    </section>
+
+    <section class="grid">
+      <aside class="panel">
+        <div class="panel-head">
+          <h2>Workflow</h2>
+          <span>ADK + MCP</span>
+        </div>
+        <div class="timeline">
+          <div class="step" data-step="0">
+            <div class="num">1</div>
+            <div>
+              <h3>Load Data</h3>
+              <p>读取 real_trades.csv 与 XAUUSD_M1.csv</p>
+            </div>
+          </div>
+          <div class="step" data-step="1">
+            <div class="num">2</div>
+            <div>
+              <h3>Analysis Agent</h3>
+              <p>计算胜率、盈亏、处置效应与止损率</p>
+            </div>
+          </div>
+          <div class="step" data-step="2">
+            <div class="num">3</div>
+            <div>
+              <h3>Advisor Agent</h3>
+              <p>调用 historical replay MCP 工具</p>
+            </div>
+          </div>
+          <div class="step" data-step="3">
+            <div class="num">4</div>
+            <div>
+              <h3>Replay Risk Controls</h3>
+              <p>分类 keep / hard stop / breaker</p>
+            </div>
+          </div>
+          <div class="step" data-step="4">
+            <div class="num">5</div>
+            <div>
+              <h3>Guardrail</h3>
+              <p>拦截加仓回本、扛单、马丁格尔</p>
+            </div>
+          </div>
+          <div class="step" data-step="5">
+            <div class="num">6</div>
+            <div>
+              <h3>Critic Agent</h3>
+              <p>输出最终量化风控意见书</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="main-stack">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Runtime Console</h2>
+            <span id="elapsed">00:00</span>
+          </div>
+          <div id="terminal" class="terminal"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Replay Action Distribution</h2>
+            <span>30 historical trades</span>
+          </div>
+          <div class="bars">
+            <div class="bar-row">
+              <div class="bar-label">Keep watching</div>
+              <div class="bar-track"><div id="barKeep" class="bar-fill bar-green"></div></div>
+              <strong id="keepCount">0</strong>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Set hard SL</div>
+              <div class="bar-track"><div id="barSl" class="bar-fill bar-amber"></div></div>
+              <strong id="slCount">0</strong>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Emergency close</div>
+              <div class="bar-track"><div id="barClose" class="bar-fill bar-red"></div></div>
+              <strong id="closeCount">0</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Sample Replay Events</h2>
+            <span>what-if simulation</span>
+          </div>
+          <div id="events" class="events"></div>
+        </section>
+
+        <section id="finalReport" class="panel hidden">
+          <div class="panel-head">
+            <h2>Final Safe Report</h2>
+            <span>Critic Agent output</span>
+          </div>
+          <div class="report">
+            <div class="report-box">
+              <h3>Risk State</h3>
+              <p>历史回放显示 30 笔交易中有 7 次触发硬止损模拟，2 次触发熔断模拟。当前演示不是实时账户执行，而是基于真实 M1 行情的回放风控证明。</p>
+            </div>
+            <div class="report-box">
+              <h3>Advisor Guidance</h3>
+              <ul>
+                <li>用硬止损和熔断阈值替代临场情绪决策。</li>
+                <li>对历史大幅逆向波动交易做复盘，识别拖延止损行为。</li>
+                <li>禁止加仓回本、扛单等待反弹、马丁格尔加倍下注。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const replay = {
+      stats: {
+        trades: 3225,
+        candles: 173391,
+        winRate: 55.8,
+        accountStatsTrades: 1842,
+        dispositionRatio: 0.84,
+        stopLossRate: 33.4
+      },
+      actions: {
+        keep_watching: 21,
+        set_hard_sl: 7,
+        emergency_close: 2
+      },
+      events: [
+        {
+          id: "26628292",
+          action: "keep_watching",
+          state: "GREEN_SAFE",
+          adverse: 1.08,
+          actual: 386.61,
+          delta: 0
+        },
+        {
+          id: "26688949",
+          action: "set_hard_sl",
+          state: "YELLOW_WATCH",
+          adverse: 3.27,
+          actual: -17.48,
+          delta: 11.48
+        },
+        {
+          id: "26907103",
+          action: "emergency_close",
+          state: "RED_BREAKER",
+          adverse: 143.24,
+          actual: -17.36,
+          delta: 5.36
+        },
+        {
+          id: "27215994",
+          action: "set_hard_sl",
+          state: "YELLOW_WATCH",
+          adverse: 3.64,
+          actual: -13.66,
+          delta: 7.66
+        },
+        {
+          id: "27219946",
+          action: "keep_watching",
+          state: "GREEN_SAFE",
+          adverse: 0.98,
+          actual: -20.32,
+          delta: 0
+        }
+      ]
+    };
+
+    const logs = [
+      { step: 0, cls: "info", text: "Loading anonymized MT5 exports: real_trades.csv" },
+      { step: 0, cls: "ok", text: "Loaded 3,225 paired XAUUSD trades and 173,391 M1 candles." },
+      { step: 1, cls: "info", text: "analysis_agent: get_account_stats(symbol='XAUUSD', days=90)" },
+      { step: 1, cls: "ok", text: "win_rate=55.8%, disposition_ratio=0.84, sl_rate=33.4%" },
+      { step: 2, cls: "info", text: "advisor_agent: applying SKILL.md thresholds and three-state risk policy." },
+      { step: 2, cls: "warn", text: "requesting simulate_historical_risk_replay(limit=30, hard_stop=3, breaker=6)" },
+      { step: 3, cls: "ok", text: "replay actions: keep_watching=21, set_hard_sl=7, emergency_close=2" },
+      { step: 3, cls: "warn", text: "historical replay mode: no live broker connection, no real order placement." },
+      { step: 4, cls: "info", text: "safety_rules.py: scanning for averaging-down, holding-loss, Martingale language." },
+      { step: 4, cls: "ok", text: "guardrail passed: unsafe recovery advice blocked before final output." },
+      { step: 5, cls: "ok", text: "critic_agent: final quantitative risk report generated." }
+    ];
+
+    const startBtn = document.getElementById("startBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const terminal = document.getElementById("terminal");
+    const runState = document.getElementById("runState");
+    const elapsed = document.getElementById("elapsed");
+    const finalReport = document.getElementById("finalReport");
+    const eventHost = document.getElementById("events");
+    let timers = [];
+    let startedAt = null;
+
+    function fmt(n, suffix = "") {
+      if (Number.isInteger(n)) return n.toLocaleString() + suffix;
+      return n.toLocaleString(undefined, { maximumFractionDigits: 1 }) + suffix;
+    }
+
+    function setStep(index) {
+      document.querySelectorAll(".step").forEach((step) => {
+        const current = Number(step.dataset.step);
+        step.classList.toggle("active", current === index);
+        step.classList.toggle("done", current < index);
+      });
+    }
+
+    function appendLog(item) {
+      const line = document.createElement("div");
+      line.className = `line ${item.cls}`;
+      const seconds = Math.floor((Date.now() - startedAt) / 1000);
+      line.innerHTML = `<span class="time">00:${String(seconds).padStart(2, "0")}</span>${item.text}`;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+      elapsed.textContent = `00:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function countMetrics() {
+      document.querySelectorAll("[data-count]").forEach((el) => {
+        const target = Number(el.dataset.count);
+        const suffix = el.dataset.suffix || "";
+        const duration = 800;
+        const start = performance.now();
+        function tick(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const value = target * progress;
+          el.textContent = fmt(progress === 1 ? target : value, suffix);
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    function renderBars() {
+      document.getElementById("keepCount").textContent = replay.actions.keep_watching;
+      document.getElementById("slCount").textContent = replay.actions.set_hard_sl;
+      document.getElementById("closeCount").textContent = replay.actions.emergency_close;
+      document.getElementById("barKeep").style.width = `${(replay.actions.keep_watching / 30) * 100}%`;
+      document.getElementById("barSl").style.width = `${(replay.actions.set_hard_sl / 30) * 100}%`;
+      document.getElementById("barClose").style.width = `${(replay.actions.emergency_close / 30) * 100}%`;
+    }
+
+    function renderEvents() {
+      eventHost.innerHTML = "";
+      replay.events.forEach((event, index) => {
+        const card = document.createElement("div");
+        const tone = event.action === "keep_watching" ? "green" : event.action === "set_hard_sl" ? "amber" : "red";
+        card.className = "event-card";
+        card.innerHTML = `
+          <div class="ticket">#${event.id}</div>
+          <div>
+            <strong>${event.state}</strong>
+            <p>max adverse ${event.adverse} pts · actual PnL $${event.actual.toFixed(2)} · replay delta $${event.delta.toFixed(2)}</p>
+          </div>
+          <div class="badge ${tone}">${event.action}</div>
+        `;
+        eventHost.appendChild(card);
+        timers.push(setTimeout(() => card.classList.add("visible"), 3400 + index * 260));
+      });
+    }
+
+    function resetDemo() {
+      timers.forEach(clearTimeout);
+      timers = [];
+      startedAt = null;
+      terminal.innerHTML = "";
+      eventHost.innerHTML = "";
+      finalReport.classList.add("hidden");
+      elapsed.textContent = "00:00";
+      runState.textContent = "Ready: historical replay, not live broker execution";
+      startBtn.disabled = false;
+      document.querySelectorAll(".step").forEach((step) => step.classList.remove("active", "done"));
+      document.querySelectorAll("[data-count]").forEach((el) => {
+        const suffix = el.dataset.suffix || "";
+        el.textContent = "0" + suffix;
+      });
+      ["barKeep", "barSl", "barClose"].forEach((id) => document.getElementById(id).style.width = "0");
+      ["keepCount", "slCount", "closeCount"].forEach((id) => document.getElementById(id).textContent = "0");
+    }
+
+    function startDemo() {
+      resetDemo();
+      startBtn.disabled = true;
+      startedAt = Date.now();
+      runState.textContent = "Running historical replay simulation...";
+      countMetrics();
+      renderEvents();
+
+      logs.forEach((item, index) => {
+        timers.push(setTimeout(() => {
+          setStep(item.step);
+          appendLog(item);
+          if (index === 6) renderBars();
+          if (index === logs.length - 1) {
+            setStep(6);
+            finalReport.classList.remove("hidden");
+            runState.textContent = "Complete: safe report generated";
+            startBtn.disabled = false;
+          }
+        }, 500 + index * 520));
+      });
+    }
+
+    startBtn.addEventListener("click", startDemo);
+    resetBtn.addEventListener("click", resetDemo);
+    resetDemo();
+  </script>
+</body>
+</html>
