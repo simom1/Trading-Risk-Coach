@@ -15,7 +15,7 @@ Personal traders often lose money not only because of market direction, but beca
 - Concentrating too much exposure in one symbol or platform.
 - Following dangerous recovery logic such as averaging down, holding losing trades, or Martingale sizing.
 
-Trading Risk Coach converts these behaviors into measurable risk signals, routes them through a multi-agent workflow, and blocks unsafe advice through deterministic guardrails.
+Trading Risk Coach converts these behaviors into measurable risk signals, routes them through a multi-agent workflow, replays historical price paths to simulate risk-control decisions, and blocks unsafe advice through deterministic guardrails.
 
 ## Data Sources
 
@@ -40,7 +40,8 @@ graph TD
     MCPRead --> Data[real_trades.csv + XAUUSD_M1.csv]
     Analysis --> Advisor[advisor_agent]
     Advisor --> Skill[SKILL.md quantitative risk rules]
-    Advisor --> MCPWrite[MCP tool: execute_risk_mitigation]
+    Advisor --> Replay[MCP tool: simulate_historical_risk_replay]
+    Advisor --> MCPWrite[MCP tool: execute_risk_mitigation for mock active orders]
     Advisor --> Guardrail[safety_rules.py after_model_callback]
     Guardrail --> Critic[critic_agent]
     Critic --> Report[Final quantitative risk report]
@@ -57,14 +58,14 @@ More detail: [ARCHITECTURE.md](ARCHITECTURE.md)
 | Advisor Agent | `trading_risk_coach/agents/advisor_agent.py` | Loads `SKILL.md`, evaluates rule thresholds, and calls active mitigation tools when needed. |
 | Critic Agent | `trading_risk_coach/agents/critic_agent.py` | Audits the final response for quantitative evidence, professional formatting, and risk-state clarity. |
 | Safety Guardrail | `trading_risk_coach/guardrails/safety_rules.py` | Uses deterministic regex checks to block unsafe trading language. |
-| MCP Server | `trading_risk_coach/mcp_server/trade_data_server.py` | Provides stdio MCP tools for real trade reads, market context, account stats, and simulated broker risk actions. |
+| MCP Server | `trading_risk_coach/mcp_server/trade_data_server.py` | Provides stdio MCP tools for real trade reads, market context, account stats, historical risk replay, and simulated broker risk actions. |
 
 ## Kaggle Rubric Mapping
 
 | Rubric requirement | Implementation evidence | Verification evidence |
 | --- | --- | --- |
 | ADK Agent and Multi-Agent workflow | `trading_risk_coach/agent.py` defines `root_agent` with `analysis_agent -> advisor_agent -> critic_agent`. | `python test_runner.py` imports the workflow and prints the registered edges. |
-| MCP Server over stdio | `trading_risk_coach/mcp_server/trade_data_server.py` exposes FastMCP tools; `analysis_agent.py` connects with `MCPToolset` and `StdioConnectionParams`. | `python test_sdd_specs.py` validates real-data MCP JSON reads, account stats, and active mitigation execution. |
+| MCP Server over stdio | `trading_risk_coach/mcp_server/trade_data_server.py` exposes FastMCP tools; `analysis_agent.py` connects with `MCPToolset` and `StdioConnectionParams`. | `python test_sdd_specs.py` validates real-data MCP JSON reads, account stats, historical replay, and active mitigation execution. |
 | Agent Skills | `trading_risk_coach/skills/risk_pattern_detection/SKILL.md` defines the Disposition Effect threshold, position risk limit, and three-state risk logic. | `python test_sdd_specs.py` parses `SKILL.md` and asserts the threshold is used by behavior tests. |
 | Security Features | `trading_risk_coach/guardrails/safety_rules.py` blocks dangerous advice such as averaging down, holding losses, all-in, and Martingale logic. | `python test_sdd_specs.py` asserts dangerous text is replaced and the original unsafe advice is not leaked. |
 | Deployability | `Dockerfile` and `requirements.txt` provide a container-ready runtime. | `docker build -t trading-risk-coach .` can run the same behavior test suite through the default container command. |
@@ -86,7 +87,7 @@ Expected flow:
 1. `analysis_agent` calls MCP tools to load recent trades.
 2. It computes core metrics such as win rate, average win, average loss, and loss/win ratio.
 3. `advisor_agent` compares the metrics against `SKILL.md`.
-4. If an active order is missing a stop loss, it calls `execute_risk_mitigation`.
+4. It can call `simulate_historical_risk_replay` to replay prior trades with real M1 candles and simulate what active risk controls would have done.
 5. `safety_rules.py` blocks any unsafe recovery advice.
 6. `critic_agent` produces a final structured risk report.
 
@@ -104,6 +105,7 @@ Current verified coverage:
 - Guardrail interception of averaging-down and holding-loss language.
 - Sanitized output does not leak the original dangerous suggestion.
 - MCP read tools return valid JSON records, account stats, and symbol summaries from real anonymized XAUUSD exports.
+- Historical replay simulates hard-stop and emergency-breaker actions without claiming live broker execution.
 - MCP write tool supports `set_hard_sl` and rejects invalid action types.
 
 Run the local ADK smoke test:

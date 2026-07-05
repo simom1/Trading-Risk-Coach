@@ -13,6 +13,7 @@ from trading_risk_coach.mcp_server.trade_data_server import (
     get_symbol_breakdown,
     get_recent_trades,
     get_symbol_history,
+    simulate_historical_risk_replay,
 )
 
 SKILL_PATH = "trading_risk_coach/skills/risk_pattern_detection/SKILL.md"
@@ -89,6 +90,15 @@ def run_sdd_assertions():
     assert "win_rate_pct" in breakdown["XAUUSD"], "Symbol breakdown missing win rate for XAUUSD!"
     print(f"  Symbol breakdown: {list(breakdown.keys())}")
     print("  [Pass] MCP read tools returned valid records and summaries (real MT5 data).")
+
+    replay = json.loads(simulate_historical_risk_replay(limit=30, hard_stop_points=3.0, emergency_points=6.0))
+    assert replay["mode"] == "historical_replay_not_live_trading", "Replay mode should clarify this is not live trading!"
+    assert replay["evaluated_trades"] > 0, "Historical replay should evaluate at least one trade!"
+    assert {"keep_watching", "set_hard_sl", "emergency_close"}.issubset(replay["actions"].keys()), "Replay actions missing expected keys!"
+    assert replay["actions"]["set_hard_sl"] + replay["actions"]["emergency_close"] > 0, "Replay should demonstrate at least one simulated mitigation action!"
+    assert {"position_id", "max_adverse_points", "replay_action"}.issubset(replay["events"][0].keys()), "Replay event missing expected fields!"
+    print(f"  Historical replay actions: {replay['actions']}")
+    print("  [Pass] Historical M1 replay can simulate active risk-control actions without a live broker.")
     
     # 4. Asserting Scenario: Execute Active Stop Loss Mitigation
     ticket_id = "T1001"

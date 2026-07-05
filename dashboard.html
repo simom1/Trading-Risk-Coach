@@ -571,8 +571,8 @@
     <div class="impl-steps">
       <div class="impl-step">
         <div class="impl-step-num">01</div>
-        <div class="impl-step-title">实时观测</div>
-        <div class="impl-step-desc">Analysis Agent 通过 MCP 接口读取账户最新订单及波动率 (XAUUSD_M1.csv)。</div>
+        <div class="impl-step-title">历史观测</div>
+        <div class="impl-step-desc">Analysis Agent 通过 MCP 接口读取匿名化交易记录和真实 M1 行情 (real_trades.csv + XAUUSD_M1.csv)。</div>
       </div>
       <div class="impl-step">
         <div class="impl-step-num">02</div>
@@ -581,8 +581,8 @@
       </div>
       <div class="impl-step">
         <div class="impl-step-num">03</div>
-        <div class="impl-step-title">主动执行</div>
-        <div class="impl-step-desc">若订单缺止损，Advisor 自动触发 `execute_risk_mitigation` 强制修改或紧急强平订单。</div>
+        <div class="impl-step-title">历史回放模拟</div>
+        <div class="impl-step-desc">Advisor 调用 `simulate_historical_risk_replay`，把历史交易当作当时的活跃持仓，模拟硬止损或熔断动作。</div>
       </div>
       <div class="impl-step">
         <div class="impl-step-num">04</div>

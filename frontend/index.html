@@ -476,12 +476,11 @@
         
         const logs = [
             { type: 'info', text: 'Workflow started: START -> analysis_agent -> advisor_agent.' },
-            { type: 'info', text: 'analysis_agent: Calculating client metrics... Win-Rate: 45.0%, Avg Loss/Win: 2.71x.' },
-            { type: 'warn', text: 'analysis_agent: Warning! Disposition Effect (Win-Small-Lose-Big) threshold breached!' },
-            { type: 'info', text: 'advisor_agent: Evaluating active broker positions... 1 critical warning found.' },
-            { type: 'err', text: 'advisor_agent ALERT: Active Position XAUUSD Buy (Ticket: T1001) has no Stop Loss! Floating loss expanding!' },
-            { type: 'info', text: 'advisor_agent: Requesting execute_risk_mitigation [Action: set_hard_sl, Ticket: T1001, Parameter: 2350.0]...' },
-            { type: 'succ', text: 'Mock Broker Response: [Success] Stop Loss successfully set to 2350.00 for Order T1001. Protection active.' },
+            { type: 'info', text: 'analysis_agent: Calculating real-data metrics... 3,225 paired XAUUSD trades loaded.' },
+            { type: 'warn', text: 'analysis_agent: Behavioral risk review complete. Checking historical adverse excursions with M1 candles...' },
+            { type: 'info', text: 'advisor_agent: Calling simulate_historical_risk_replay [limit=30, hard_stop=3, breaker=6]...' },
+            { type: 'err', text: 'historical replay: set_hard_sl and emergency_close scenarios found in prior price paths.' },
+            { type: 'succ', text: 'Replay mode confirmed: historical what-if simulation, not live broker execution.' },
             { type: 'succ', text: 'ADK after_model_callback: Output sanitized and safety check passed.' },
             { type: 'info', text: 'Workflow completed successfully. Final safe report generated.' }
         ];

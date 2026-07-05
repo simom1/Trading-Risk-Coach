@@ -9,7 +9,7 @@ Trading Risk Coach is a behavior-driven risk review system for personal trading 
 - Detect whether the trader is showing a "win small, lose big" pattern.
 - Quantify risk through simple, auditable metrics.
 - Apply rule-based risk thresholds from an Agent Skill file.
-- Simulate protective broker actions through MCP tools.
+- Replay historical price paths to simulate protective risk-control actions through MCP tools.
 - Block unsafe recovery-trading language through deterministic guardrails.
 
 The system intentionally avoids market-entry recommendations and price prediction.
@@ -37,13 +37,13 @@ User request
 | `analysis_agent` | `trading_risk_coach/agents/analysis_agent.py` | Calls MCP tools and reports quantitative trade metrics. | Does not provide trading advice or position sizing. |
 | `advisor_agent` | `trading_risk_coach/agents/advisor_agent.py` | Evaluates analysis output against `SKILL.md`; executes mitigation tools if needed. | Must not suggest averaging down, holding losses, or Martingale logic. |
 | `critic_agent` | `trading_risk_coach/agents/critic_agent.py` | Audits and formats the final report with exact metrics and risk state. | Does not call external tools. |
-| MCP server | `trading_risk_coach/mcp_server/trade_data_server.py` | Provides the tool boundary for real trade reads, market context, account stats, and simulated broker writes. | Owns data access; agents do not read CSV directly. |
+| MCP server | `trading_risk_coach/mcp_server/trade_data_server.py` | Provides the tool boundary for real trade reads, market context, account stats, historical risk replay, and simulated broker writes. | Owns data access; agents do not read CSV directly. |
 | Skill rules | `trading_risk_coach/skills/risk_pattern_detection/SKILL.md` | Defines quantitative risk thresholds and three-state action policy. | Business rules are separate from agent source code. |
 | Safety guardrail | `trading_risk_coach/guardrails/safety_rules.py` | Deterministically sanitizes unsafe model output. | Runs after model generation and before user-facing output. |
 
 ## 4. Data and Tool Boundary
 
-The project uses MCP to keep tool access separate from agent reasoning. The MCP server exposes six tools:
+The project uses MCP to keep tool access separate from agent reasoning. The MCP server exposes seven tools:
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
@@ -52,6 +52,7 @@ The project uses MCP to keep tool access separate from agent reasoning. The MCP 
 | `get_account_stats(symbol, days)` | Read | Returns win rate, average win/loss, disposition ratio, stop-loss rate, and holding-time metrics. |
 | `get_symbol_breakdown()` | Read | Returns per-symbol PnL, win rate, and average win/loss breakdown. |
 | `get_market_context(trade_time, window_minutes)` | Read | Returns real XAUUSD M1 price context and volatility around a trade timestamp. |
+| `simulate_historical_risk_replay(limit, hard_stop_points, emergency_points)` | What-if replay | Replays historical trades with real M1 candle movement to simulate hard-stop and emergency-breaker actions. |
 | `execute_risk_mitigation(action_type, ticket_id, parameter)` | Write simulation | Simulates setting a hard stop loss or emergency closing a trade. |
 
 This design makes it possible to replace the CSV file with a real broker API or database while keeping the agents unchanged.
@@ -99,6 +100,7 @@ The test suite verifies behavior at the rule and tool level:
 | Skill threshold | Parses `SKILL.md` and checks the Disposition Effect threshold. |
 | Guardrail | Confirms dangerous text is detected, replaced, and not leaked. |
 | MCP reads | Confirms JSON records and platform summaries are valid. |
+| Historical replay | Confirms M1 candle replay can classify keep-watch, hard-stop, and emergency-breaker scenarios without live broker access. |
 | MCP writes | Confirms stop-loss mitigation succeeds and unknown actions fail safely. |
 | ADK import | Confirms the workflow can be imported and inspected locally. |
 

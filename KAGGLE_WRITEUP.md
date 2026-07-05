@@ -18,7 +18,7 @@ This project uses **real market data** from two sources:
 
 Retail and small-account traders often lose money through repeated behavioral patterns rather than a lack of chart access. One common pattern is the Disposition Effect: taking small profits quickly while allowing losing trades to grow. Other high-risk patterns include trading without hard stop losses, concentrating risk in one symbol, and trying to recover losses through averaging down or Martingale-style sizing.
 
-**Trading Risk Coach** addresses this as a post-trade review and active risk-control workflow. It analyzes historical XAUUSD trade records, quantifies behavior risk, applies explicit business rules from an Agent Skill, simulates protective broker actions through MCP tools, and uses deterministic guardrails to block unsafe recovery-trading advice.
+**Trading Risk Coach** addresses this as a post-trade review and active risk-control workflow. It analyzes historical XAUUSD trade records, quantifies behavior risk, applies explicit business rules from an Agent Skill, replays historical M1 price paths to simulate protective risk-control actions, and uses deterministic guardrails to block unsafe recovery-trading advice.
 
 ## 2. Architecture Diagram
 
@@ -41,7 +41,7 @@ User risk-review request
 | Rubric Requirement | Implementation Evidence | Verification Evidence |
 | --- | --- | --- |
 | ADK Agent and Multi-Agent workflow | `trading_risk_coach/agent.py` defines a sequential ADK workflow: `analysis_agent -> advisor_agent -> critic_agent`. | `python test_runner.py` imports the workflow and prints the registered edges. |
-| MCP Server over stdio | `trade_data_server.py` exposes FastMCP tools for trade reads and simulated risk actions. | `python test_sdd_specs.py` validates MCP JSON reads and mitigation writes. |
+| MCP Server over stdio | `trade_data_server.py` exposes FastMCP tools for trade reads, historical M1 replay, and simulated risk actions. | `python test_sdd_specs.py` validates MCP JSON reads, replay actions, and mitigation writes. |
 | Agent Skills | `SKILL.md` defines the Disposition Effect threshold, 2% risk limit, and Green/Yellow/Red risk logic. | The SDD test parses `SKILL.md` and asserts the threshold is used. |
 | Security Features | `safety_rules.py` uses deterministic pattern checks to block averaging down, holding losses, all-in, and Martingale advice. | The SDD test confirms dangerous text is replaced and the unsafe original phrase does not leak. |
 | Deployability | `Dockerfile` and pinned `requirements.txt` provide a container-ready runtime. | The Docker default command runs the same behavior verification suite. |
@@ -52,12 +52,13 @@ User risk-review request
 - `trading_risk_coach/agents/analysis_agent.py`: MCP-backed trade metric analysis.
 - `trading_risk_coach/agents/advisor_agent.py`: Skill-based risk diagnosis and active mitigation.
 - `trading_risk_coach/agents/critic_agent.py`: quantitative report audit and formatting.
-- `trading_risk_coach/mcp_server/trade_data_server.py`: FastMCP server with 6 tools:
+- `trading_risk_coach/mcp_server/trade_data_server.py`: FastMCP server with 7 tools:
   - `get_recent_trades` — recent trade records from anonymized MT5 exports
   - `get_symbol_history` — symbol-specific trade history
   - `get_account_stats` — full quantitative metrics (disposition ratio, SL rate, hold time)
   - `get_symbol_breakdown` — per-symbol PnL and win rate breakdown
   - `get_market_context` — real M1 price context around any trade timestamp (volatility, ATR)
+  - `simulate_historical_risk_replay` — historical what-if replay that simulates hard-stop and emergency-breaker decisions without live broker access
   - `execute_risk_mitigation` — simulated broker risk actions with parameter validation
 - `trading_risk_coach/data/real_trades.csv`: 3,225 paired open/close XAUUSD trade records from anonymized MT5 exports.
 - `trading_risk_coach/data/XAUUSD_M1.csv`: 173,391 real 1-minute XAUUSD candles.
@@ -78,7 +79,7 @@ Expected system behavior:
 1. `analysis_agent` calls MCP tools to load trade records.
 2. It computes win rate, average win, average loss, loss/win ratio, and concentration risk.
 3. `advisor_agent` compares those metrics against `SKILL.md`.
-4. When active risk is detected, it calls `execute_risk_mitigation`, for example `set_hard_sl`.
+4. It calls `simulate_historical_risk_replay` to replay prior trades with real M1 candles and simulate what hard-stop or breaker controls would have done.
 5. `safety_rules.py` blocks unsafe recovery language.
 6. `critic_agent` produces the final structured report.
 
@@ -94,7 +95,7 @@ Example MCP mitigation response:
 }
 ```
 
-An optional interactive visual summary is included in `dashboard.html`. It presents the before/after narrative, the real-data scale, and the ADK/MCP implementation path for a quick evaluator-friendly walkthrough.
+An optional interactive visual summary is included in `dashboard.html`. It presents the before/after narrative, the real-data scale, the historical replay concept, and the ADK/MCP implementation path for a quick evaluator-friendly walkthrough.
 
 ## 6. Security Mechanism
 
@@ -110,6 +111,7 @@ $ python test_sdd_specs.py
 [Pass] Guardrail successfully intercepted the Averaging Down pattern.
 [Pass] Guardrail successfully intercepted the Position Holding pattern.
 [Pass] MCP read tools returned valid records and summaries.
+[Pass] Historical M1 replay can simulate active risk-control actions without a live broker.
 [Pass] Advisor Agent successfully executed active Stop-Loss command on Mock Broker.
 [Pass] MCP write tool rejects unknown mitigation actions safely.
 All Spec-Driven Development behavior tests PASSED.

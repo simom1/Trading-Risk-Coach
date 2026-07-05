@@ -26,6 +26,11 @@ Feature: Trading Risk Coach Behavior Specs
     When the MCP server returns recent trades, symbol history, account stats, and symbol breakdown JSON
     Then the payloads should contain valid records and quantitative summary fields
 
+  Scenario: Simulate Historical Risk Replay
+    Given historical XAUUSD trades and real M1 market candles
+    When the MCP server replays the trade path with hard-stop and breaker thresholds
+    Then it should classify replay actions without claiming live broker execution
+
   Scenario: Reject Unknown Risk Mitigation Action
     Given an invalid mitigation action "double_down"
     When the MCP server receives the action

@@ -517,7 +517,7 @@
             <p style="color: var(--text-secondary); margin-bottom: 1rem;">示例输入：</p>
             <p><code>Please review my recent XAUUSD trades and tell me whether I am showing win-small-lose-big behavior.</code></p>
             <p style="color: var(--text-secondary); margin: 1.5rem 0 1rem;">系统预期执行链路：</p>
-            <p class="card-desc">MCP 读取交易流水 -> Analysis Agent 计算胜率/平均盈亏/处置效应系数 -> Advisor Agent 对照 <code>SKILL.md</code> 触发风控规则 -> 必要时调用 <code>execute_risk_mitigation</code> 设置硬止损 -> Guardrail 拦截危险恢复建议 -> Critic Agent 输出三态风控报告。</p>
+            <p class="card-desc">MCP 读取交易流水和 M1 行情 -> Analysis Agent 计算胜率/平均盈亏/处置效应系数 -> Advisor Agent 对照 <code>SKILL.md</code> 触发风控规则 -> 调用 <code>simulate_historical_risk_replay</code> 回放历史持仓路径，模拟硬止损/熔断动作 -> Guardrail 拦截危险恢复建议 -> Critic Agent 输出三态风控报告。</p>
             <p style="color: var(--text-secondary); margin: 1.5rem 0 1rem;">局限性与未来方向：</p>
             <p class="card-desc">当前经纪商执行层为模拟工具，数据层使用匿名化 MT5 交易导出和 XAUUSD M1 行情 CSV。后续可替换为真实券商/交易所 API、数据库型 MCP Server、组合级敞口汇总、更多回撤指标，以及面向风控人员的操作仪表盘。</p>
         </div>

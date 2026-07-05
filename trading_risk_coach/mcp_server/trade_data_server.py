@@ -13,7 +13,7 @@ Fields include open_price, close_price, open_time, close_time, pnl, lot_size, sy
 
 [Implementation / 实现细节]
 - FastMCP tool registry.
-- Historical data tools: `get_recent_trades`, `get_symbol_history`, `get_account_stats`, `get_symbol_breakdown`, `get_market_context`.
+- Historical data tools: `get_recent_trades`, `get_symbol_history`, `get_account_stats`, `get_symbol_breakdown`, `get_market_context`, `simulate_historical_risk_replay`.
 - Active execution tool: `execute_risk_mitigation` simulates broker risk actions.
 """
 
@@ -171,6 +171,130 @@ def get_market_context(trade_time: str, window_minutes: int = 30) -> str:
         "avg_candle_range_pts": round(float(window["range"].mean()), 2),
         "volatility_assessment": "HIGH" if window["range"].mean() > 3.0 else "NORMAL",
         "data_source": "XAUUSD_M1.csv (173K real candles, 2026-01 to 2026-07)",
+    }
+    return json.dumps(summary, ensure_ascii=False)
+
+
+@mcp.tool()
+def simulate_historical_risk_replay(
+    limit: int = 20,
+    hard_stop_points: float = 5.0,
+    emergency_points: float = 10.0,
+) -> str:
+    """用历史交易和真实 M1 行情回放模拟主动风控。
+
+    This is a historical what-if simulation, not live broker execution. It replays
+    each historical trade as if it were an active position at the time, then checks
+    whether a protective hard stop or emergency breaker would have been triggered.
+    It uses relative M1 price movement inside the trade window rather than absolute
+    price equality, because broker execution exports and market candles can have
+    small source/timezone/quote-level differences.
+
+    Args:
+        limit: 取最近多少笔可回放交易，默认 20。
+        hard_stop_points: 模拟硬止损距离，默认 5 XAUUSD points。
+        emergency_points: 模拟熔断距离，默认 10 XAUUSD points。
+    """
+    if not M1_PATH.exists():
+        return json.dumps({"error": "M1 market data not available."})
+
+    trades = _load_trades()
+    m1 = pd.read_csv(M1_PATH, parse_dates=["time"])
+    m1_start = m1["time"].min()
+    m1_end = m1["time"].max()
+
+    replayable = trades[
+        (trades["symbol"].str.upper() == "XAUUSD")
+        & (trades["open_time"] >= m1_start)
+        & (trades["close_time"] <= m1_end)
+    ].tail(limit)
+
+    events = []
+    for _, trade in replayable.iterrows():
+        window = m1[
+            (m1["time"] >= trade["open_time"])
+            & (m1["time"] <= trade["close_time"])
+        ]
+        if window.empty:
+            continue
+
+        direction = str(trade["direction"]).upper()
+        entry_price = float(trade["open_price"])
+        lot_size = float(trade["lot_size"])
+        point_value_usd = lot_size * 100.0
+
+        reference_price = float(window.iloc[0]["close"])
+        relative_low = window["low"] - reference_price
+        relative_high = window["high"] - reference_price
+
+        if direction == "B":
+            max_adverse_points = max(0.0, -float(relative_low.min()))
+            max_favorable_points = max(0.0, float(relative_high.max()))
+            hard_stop_price = round(entry_price - hard_stop_points, 2)
+            emergency_price = round(entry_price - emergency_points, 2)
+            hard_stop_hit = max_adverse_points >= hard_stop_points
+            emergency_hit = max_adverse_points >= emergency_points
+        else:
+            max_adverse_points = max(0.0, float(relative_high.max()))
+            max_favorable_points = max(0.0, -float(relative_low.min()))
+            hard_stop_price = round(entry_price + hard_stop_points, 2)
+            emergency_price = round(entry_price + emergency_points, 2)
+            hard_stop_hit = max_adverse_points >= hard_stop_points
+            emergency_hit = max_adverse_points >= emergency_points
+
+        actual_pnl = float(trade["pnl"])
+        hard_stop_pnl = -hard_stop_points * point_value_usd
+        emergency_pnl = -emergency_points * point_value_usd
+
+        if emergency_hit:
+            replay_action = "emergency_close"
+            replay_state = "RED_BREAKER"
+            replay_pnl = emergency_pnl
+        elif hard_stop_hit:
+            replay_action = "set_hard_sl"
+            replay_state = "YELLOW_WATCH"
+            replay_pnl = hard_stop_pnl
+        else:
+            replay_action = "keep_watching"
+            replay_state = "GREEN_SAFE"
+            replay_pnl = actual_pnl
+
+        replay_delta = round(replay_pnl - actual_pnl, 2)
+        events.append({
+            "position_id": str(trade["position_id"]),
+            "symbol": trade["symbol"],
+            "direction": direction,
+            "open_time": trade["open_time"].isoformat(),
+            "close_time": trade["close_time"].isoformat(),
+            "entry_price": round(entry_price, 2),
+            "actual_close_price": round(float(trade["close_price"]), 2),
+            "actual_pnl_usd": round(actual_pnl, 2),
+            "market_reference_price": round(reference_price, 2),
+            "max_adverse_points": round(max_adverse_points, 2),
+            "max_favorable_points": round(max_favorable_points, 2),
+            "hard_stop_price": hard_stop_price,
+            "emergency_price": emergency_price,
+            "replay_state": replay_state,
+            "replay_action": replay_action,
+            "replay_pnl_usd": round(replay_pnl, 2),
+            "replay_delta_vs_actual_usd": replay_delta,
+            "saved_loss_usd": max(0.0, replay_delta),
+            "opportunity_cost_usd": max(0.0, -replay_delta),
+        })
+
+    summary = {
+        "mode": "historical_replay_not_live_trading",
+        "description": "Replays historical trades with real M1 candles to simulate what active risk controls would have done at the time.",
+        "evaluated_trades": len(events),
+        "hard_stop_points": hard_stop_points,
+        "emergency_points": emergency_points,
+        "actions": {
+            "keep_watching": sum(1 for event in events if event["replay_action"] == "keep_watching"),
+            "set_hard_sl": sum(1 for event in events if event["replay_action"] == "set_hard_sl"),
+            "emergency_close": sum(1 for event in events if event["replay_action"] == "emergency_close"),
+        },
+        "total_replay_delta_vs_actual_usd": round(sum(event["replay_delta_vs_actual_usd"] for event in events), 2),
+        "events": events,
     }
     return json.dumps(summary, ensure_ascii=False)
 
