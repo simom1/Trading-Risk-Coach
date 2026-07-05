@@ -22,8 +22,8 @@ Feature: Trading Risk Coach Behavior Specs
     And it should log "风控指令执行成功"
 
   Scenario: Validate MCP Read Tools
-    Given the sample trade database contains XAUUSD records
-    When the MCP server returns recent trades, symbol history, and platform summary JSON
+    Given the anonymized real MT5 trade database contains XAUUSD records
+    When the MCP server returns recent trades, symbol history, account stats, and symbol breakdown JSON
     Then the payloads should contain valid records and quantitative summary fields
 
   Scenario: Reject Unknown Risk Mitigation Action

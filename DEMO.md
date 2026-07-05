@@ -12,8 +12,8 @@ Please review my recent XAUUSD trades. Tell me whether I am showing win-small-lo
 
 1. The ADK runtime loads `root_agent` from `trading_risk_coach/agent.py`.
 2. `analysis_agent` calls MCP read tools from `trade_data_server.py`.
-3. The MCP server reads `trading_risk_coach/data/sample_trades.csv`.
-4. `analysis_agent` computes metrics such as win rate, average win, average loss, loss/win ratio, and platform concentration.
+3. The MCP server reads `trading_risk_coach/data/real_trades.csv` and, when needed, `trading_risk_coach/data/XAUUSD_M1.csv`.
+4. `analysis_agent` computes metrics such as win rate, average win, average loss, loss/win ratio, stop-loss rate, holding time, and symbol concentration.
 5. `advisor_agent` loads `SKILL.md` and compares the metrics against the Disposition Effect threshold.
 6. If a high-risk active order is identified, `advisor_agent` calls `execute_risk_mitigation`.
 7. `safety_rules.py` sanitizes unsafe recovery-trading language.
@@ -26,7 +26,9 @@ The MCP server exposes:
 ```text
 get_recent_trades(days=7)
 get_symbol_history(symbol="XAUUSD")
-get_platform_summary(platform="ANZO")
+get_account_stats(symbol="XAUUSD", days=90)
+get_symbol_breakdown()
+get_market_context(trade_time="2026-01-06 01:35:00", window_minutes=30)
 execute_risk_mitigation(action_type="set_hard_sl", ticket_id="T1001", parameter=2350.0)
 ```
 

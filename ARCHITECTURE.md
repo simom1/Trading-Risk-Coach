@@ -37,19 +37,21 @@ User request
 | `analysis_agent` | `trading_risk_coach/agents/analysis_agent.py` | Calls MCP tools and reports quantitative trade metrics. | Does not provide trading advice or position sizing. |
 | `advisor_agent` | `trading_risk_coach/agents/advisor_agent.py` | Evaluates analysis output against `SKILL.md`; executes mitigation tools if needed. | Must not suggest averaging down, holding losses, or Martingale logic. |
 | `critic_agent` | `trading_risk_coach/agents/critic_agent.py` | Audits and formats the final report with exact metrics and risk state. | Does not call external tools. |
-| MCP server | `trading_risk_coach/mcp_server/trade_data_server.py` | Provides the tool boundary for data reads and simulated broker writes. | Owns data access; agents do not read CSV directly. |
+| MCP server | `trading_risk_coach/mcp_server/trade_data_server.py` | Provides the tool boundary for real trade reads, market context, account stats, and simulated broker writes. | Owns data access; agents do not read CSV directly. |
 | Skill rules | `trading_risk_coach/skills/risk_pattern_detection/SKILL.md` | Defines quantitative risk thresholds and three-state action policy. | Business rules are separate from agent source code. |
 | Safety guardrail | `trading_risk_coach/guardrails/safety_rules.py` | Deterministically sanitizes unsafe model output. | Runs after model generation and before user-facing output. |
 
 ## 4. Data and Tool Boundary
 
-The project uses MCP to keep tool access separate from agent reasoning. The MCP server exposes four tools:
+The project uses MCP to keep tool access separate from agent reasoning. The MCP server exposes six tools:
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
-| `get_recent_trades(days)` | Read | Returns recent trade records from `sample_trades.csv`. |
-| `get_symbol_history(symbol)` | Read | Returns trade history for one symbol such as `XAUUSD`. |
-| `get_platform_summary(platform)` | Read | Returns aggregate PnL, win rate, average win, and average loss for a platform. |
+| `get_recent_trades(days)` | Read | Returns recent anonymized MT5 trade records from `real_trades.csv`. |
+| `get_symbol_history(symbol, limit)` | Read | Returns trade history for one symbol such as `XAUUSD`. |
+| `get_account_stats(symbol, days)` | Read | Returns win rate, average win/loss, disposition ratio, stop-loss rate, and holding-time metrics. |
+| `get_symbol_breakdown()` | Read | Returns per-symbol PnL, win rate, and average win/loss breakdown. |
+| `get_market_context(trade_time, window_minutes)` | Read | Returns real XAUUSD M1 price context and volatility around a trade timestamp. |
 | `execute_risk_mitigation(action_type, ticket_id, parameter)` | Write simulation | Simulates setting a hard stop loss or emergency closing a trade. |
 
 This design makes it possible to replace the CSV file with a real broker API or database while keeping the agents unchanged.
@@ -118,6 +120,6 @@ adk web trading_risk_coach --host 0.0.0.0 --port 8080
 ## 9. Known Limits
 
 - The broker execution tool is a simulation and does not place real orders.
-- The sample data set is local CSV data.
+- The current data layer uses anonymized local CSV exports; production use would replace it with a broker API or database-backed MCP server.
 - The project is designed for risk review and behavior de-biasing, not financial advice.
 - Live ADK model calls require a valid Gemini API key.

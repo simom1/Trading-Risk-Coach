@@ -11,7 +11,7 @@ This project uses **real market data** from two sources:
 
 | Data | File | Description |
 | --- | --- | --- |
-| Real trade history | `real_trades.csv` | 3,225 paired open/close XAUUSD trades from real MT5 account 8010234 (Nov 2025 – Jun 2026), win rate 58.6% |
+| Real trade history | `real_trades.csv` | 3,225 paired open/close XAUUSD trades from anonymized MT5 exports (Nov 2025 – Jun 2026), win rate 58.6% |
 | Real market prices | `XAUUSD_M1.csv` | 173,391 rows of XAUUSD 1-minute OHLCV candles (Jan – Jul 2026, price range 3942–5597) |
 
 ## 1. Product Background and Problem
@@ -27,7 +27,7 @@ User risk-review request
   -> ADK root_agent
   -> analysis_agent
        -> MCP read tools
-       -> sample_trades.csv
+       -> real_trades.csv + XAUUSD_M1.csv
   -> advisor_agent
        -> SKILL.md quantitative rules
        -> MCP write tool when mitigation is required
@@ -52,13 +52,14 @@ User risk-review request
 - `trading_risk_coach/agents/analysis_agent.py`: MCP-backed trade metric analysis.
 - `trading_risk_coach/agents/advisor_agent.py`: Skill-based risk diagnosis and active mitigation.
 - `trading_risk_coach/agents/critic_agent.py`: quantitative report audit and formatting.
-- `trading_risk_coach/mcp_server/trade_data_server.py`: FastMCP server with 5 tools:
-  - `get_recent_trades` — recent trade records from real MT5 account
+- `trading_risk_coach/mcp_server/trade_data_server.py`: FastMCP server with 6 tools:
+  - `get_recent_trades` — recent trade records from anonymized MT5 exports
+  - `get_symbol_history` — symbol-specific trade history
   - `get_account_stats` — full quantitative metrics (disposition ratio, SL rate, hold time)
   - `get_symbol_breakdown` — per-symbol PnL and win rate breakdown
   - `get_market_context` — real M1 price context around any trade timestamp (volatility, ATR)
   - `execute_risk_mitigation` — simulated broker risk actions with parameter validation
-- `trading_risk_coach/data/real_trades.csv`: 3,648 real MT5 trade records.
+- `trading_risk_coach/data/real_trades.csv`: 3,225 paired open/close XAUUSD trade records from anonymized MT5 exports.
 - `trading_risk_coach/data/XAUUSD_M1.csv`: 173,391 real 1-minute XAUUSD candles.
 - `trading_risk_coach/skills/risk_pattern_detection/SKILL.md`: decoupled business rules.
 - `trading_risk_coach/guardrails/safety_rules.py`: deterministic safety guardrails.
@@ -143,7 +144,7 @@ Container deployment is supported through `Dockerfile`. The default container co
 ## 9. Limitations and Future Work
 
 - The broker execution layer is a simulation and does not place real orders.
-- The sample data is local CSV data; production use would replace it with a broker API or database-backed MCP server.
+- The current data layer uses anonymized local CSV exports; production use would replace it with a broker API or database-backed MCP server.
 - The current guardrail is intentionally conservative and keyword-based. Future versions could add policy versioning and structured safety audits.
 - Future work could include portfolio-level exposure aggregation, richer drawdown analytics, and an operator dashboard.
 

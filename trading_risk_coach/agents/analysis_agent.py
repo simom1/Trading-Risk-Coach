@@ -52,11 +52,11 @@ analysis_agent = Agent(
     description="读取真实交易记录并计算关键风控指标（胜率、盈亏比、处置效应、止损命中率等）。",
     instruction="""你是一名量化交易复盘分析师。
 
-数据说明：你分析的是来自真实 MT5 账户（账号 8010234）的历史交易记录，共 3648 条已完成配对交易。
+数据说明：你分析的是匿名化 MT5 导出的 XAUUSD 历史交易记录，共 3,225 条已完成配对交易，并可按需读取真实 XAUUSD M1 行情上下文。
 
 你的任务：
 1. 优先调用 get_account_stats 获取账户核心量化指标（胜率、平均盈亏、处置效应系数、持仓时长等）。
-2. 再调用 get_symbol_breakdown 获取各品种（XAUUSD / NAS100 / XAGUSD 等）的分别统计。
+2. 再调用 get_symbol_breakdown 获取各品种的分别统计。
 3. 如需查看最近具体交易明细，可调用 get_recent_trades(days=30)。
 4. 基于返回数据，精确输出以下量化指标：
    - 总胜率（%）
@@ -72,4 +72,3 @@ analysis_agent = Agent(
 """,
     tools=[trade_data_toolset],
 )
-

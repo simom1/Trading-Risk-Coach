@@ -2,18 +2,18 @@
 Trade Data & Active Mitigation MCP Server (数据与主动风控执行 MCP 服务端)
 -----------------------------------------------------------------------
 [Design Intent / 设计意图]
-This server handles both READ operations (fetching real historical trade logs from
-real MT5 account data) and WRITE operations (simulating active risk mitigation
+This server handles both READ operations (fetching anonymized real historical trade logs from
+MT5 exports) and WRITE operations (simulating active risk mitigation
 actions like setting stop losses or emergency closes).
 
 [Data Source / 数据来源]
-real_trades.csv: 3648 paired open/close trade records from real MT5 account 8010234.
+real_trades.csv: 3,225 paired open/close XAUUSD trade records from anonymized MT5 exports.
+XAUUSD_M1.csv: 173,391 rows of real XAUUSD 1-minute OHLCV candles.
 Fields include open_price, close_price, open_time, close_time, pnl, lot_size, symbol, etc.
-This replaces the previous hand-crafted sample_trades.csv with genuine market data.
 
 [Implementation / 实现细节]
 - FastMCP tool registry.
-- Standard historical data tools: `get_recent_trades`, `get_symbol_history`, `get_platform_summary`, `get_account_stats`.
+- Historical data tools: `get_recent_trades`, `get_symbol_history`, `get_account_stats`, `get_symbol_breakdown`, `get_market_context`.
 - Active execution tool: `execute_risk_mitigation` simulates broker risk actions.
 """
 

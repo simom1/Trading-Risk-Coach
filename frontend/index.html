@@ -360,8 +360,8 @@
         </div>
         <div class="metric-card green">
             <div class="metric-label">交割单胜率</div>
-            <div class="metric-value">45.0%</div>
-            <div class="metric-desc">分析样本: 最近40笔 XAUUSD 交易</div>
+            <div class="metric-value">55.8%</div>
+            <div class="metric-desc">分析样本: 最近90天匿名化 XAUUSD 交易</div>
         </div>
         <div class="metric-card purple">
             <div class="metric-label">品种集中度风险</div>
@@ -388,8 +388,8 @@
                 <div class="panel-title">📟 Active Copilot 风控执行终端（模拟交易所）</div>
                 <div class="terminal-box" id="termConsole">
                     <div class="term-line"><span class="term-time">[00:00:01]</span> <span class="term-info">[SYSTEM]</span> Active Risk Copilot initialized. Listening to broker stdio channel.</div>
-                    <div class="term-line"><span class="term-time">[00:00:02]</span> <span class="term-info">[SYSTEM]</span> decopled MCP database connected. Loading sample_trades.csv...</div>
-                    <div class="term-line"><span class="term-time">[00:00:03]</span> <span class="term-info">[SYSTEM]</span> Loaded 40 historical trade logs of XAUUSD & USOIL.</div>
+                    <div class="term-line"><span class="term-time">[00:00:02]</span> <span class="term-info">[SYSTEM]</span> decoupled MCP database connected. Loading anonymized real_trades.csv and XAUUSD_M1.csv...</div>
+                    <div class="term-line"><span class="term-time">[00:00:03]</span> <span class="term-info">[SYSTEM]</span> Loaded 3,225 paired XAUUSD trades and 173,391 M1 market candles.</div>
                     <!-- Dynamically appended on click -->
                 </div>
                 <button class="btn-run" onclick="triggerWinddown()">一键启动风控评估与主动作业</button>

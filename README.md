@@ -25,8 +25,8 @@ The system implements an Observe -> Think -> Act -> Audit loop:
 graph TD
     User[User risk review request] --> Root[ADK root_agent workflow]
     Root --> Analysis[analysis_agent]
-    Analysis --> MCPRead[MCP tools: get_recent_trades, get_symbol_history, get_platform_summary]
-    MCPRead --> CSV[sample_trades.csv]
+    Analysis --> MCPRead[MCP tools: get_recent_trades, get_account_stats, get_market_context]
+    MCPRead --> Data[real_trades.csv + XAUUSD_M1.csv]
     Analysis --> Advisor[advisor_agent]
     Advisor --> Skill[SKILL.md quantitative risk rules]
     Advisor --> MCPWrite[MCP tool: execute_risk_mitigation]
@@ -46,14 +46,14 @@ More detail: [ARCHITECTURE.md](ARCHITECTURE.md)
 | Advisor Agent | `trading_risk_coach/agents/advisor_agent.py` | Loads `SKILL.md`, evaluates rule thresholds, and calls active mitigation tools when needed. |
 | Critic Agent | `trading_risk_coach/agents/critic_agent.py` | Audits the final response for quantitative evidence, professional formatting, and risk-state clarity. |
 | Safety Guardrail | `trading_risk_coach/guardrails/safety_rules.py` | Uses deterministic regex checks to block unsafe trading language. |
-| MCP Server | `trading_risk_coach/mcp_server/trade_data_server.py` | Provides stdio MCP tools for data reads and simulated broker risk actions. |
+| MCP Server | `trading_risk_coach/mcp_server/trade_data_server.py` | Provides stdio MCP tools for real trade reads, market context, account stats, and simulated broker risk actions. |
 
 ## Kaggle Rubric Mapping
 
 | Rubric requirement | Implementation evidence | Verification evidence |
 | --- | --- | --- |
 | ADK Agent and Multi-Agent workflow | `trading_risk_coach/agent.py` defines `root_agent` with `analysis_agent -> advisor_agent -> critic_agent`. | `python test_runner.py` imports the workflow and prints the registered edges. |
-| MCP Server over stdio | `trading_risk_coach/mcp_server/trade_data_server.py` exposes FastMCP tools; `analysis_agent.py` connects with `MCPToolset` and `StdioConnectionParams`. | `python test_sdd_specs.py` validates MCP JSON read/write behavior and active mitigation execution. |
+| MCP Server over stdio | `trading_risk_coach/mcp_server/trade_data_server.py` exposes FastMCP tools; `analysis_agent.py` connects with `MCPToolset` and `StdioConnectionParams`. | `python test_sdd_specs.py` validates real-data MCP JSON reads, account stats, and active mitigation execution. |
 | Agent Skills | `trading_risk_coach/skills/risk_pattern_detection/SKILL.md` defines the Disposition Effect threshold, position risk limit, and three-state risk logic. | `python test_sdd_specs.py` parses `SKILL.md` and asserts the threshold is used by behavior tests. |
 | Security Features | `trading_risk_coach/guardrails/safety_rules.py` blocks dangerous advice such as averaging down, holding losses, all-in, and Martingale logic. | `python test_sdd_specs.py` asserts dangerous text is replaced and the original unsafe advice is not leaked. |
 | Deployability | `Dockerfile` and `requirements.txt` provide a container-ready runtime. | `docker build -t trading-risk-coach .` can run the same behavior test suite through the default container command. |
@@ -90,7 +90,7 @@ Current verified coverage:
 - Disposition Effect threshold from `SKILL.md`.
 - Guardrail interception of averaging-down and holding-loss language.
 - Sanitized output does not leak the original dangerous suggestion.
-- MCP read tools return valid JSON records and summaries.
+- MCP read tools return valid JSON records, account stats, and symbol summaries from real anonymized XAUUSD exports.
 - MCP write tool supports `set_hard_sl` and rejects invalid action types.
 
 Run the local ADK smoke test:
