@@ -19,6 +19,7 @@ Upgraded to a 3-agent orchestration (Analysis -> Advisor -> Critic) inspired by 
 - Exit: Outputs the safe, audited, de-biased, and sanitized final advisory text block.
 """
 
+from trading_risk_coach import config  # noqa: F401 - load local .env before agents start
 from google.adk import Workflow
 from trading_risk_coach.agents.analysis_agent import analysis_agent
 from trading_risk_coach.agents.advisor_agent import advisor_agent

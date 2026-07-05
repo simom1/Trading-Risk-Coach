@@ -151,7 +151,15 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Add your Gemini key to `.env`.
+Add your Gemini key to `.env`. This file is local-only and git-ignored:
+
+```bash
+GEMINI_API_KEY=
+```
+
+Paste your real key after the equals sign in your local `.env`. At runtime the project loads `.env` automatically. If only `GEMINI_API_KEY` is present, it is normalized to `GOOGLE_API_KEY` inside the local Python process for Google ADK/GenAI compatibility. The real key is never written to tracked files.
+
+Note: live Gemini calls also depend on Google AI API regional availability. If the API returns a location support error, run the live demo from a supported network/environment such as Kaggle/Colab or another Google AI-supported region.
 
 Run tests:
 

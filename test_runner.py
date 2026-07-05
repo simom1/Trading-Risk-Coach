@@ -6,6 +6,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from trading_risk_coach.agent import root_agent
+from trading_risk_coach.config import API_KEY_SOURCE, has_local_api_key
 from trading_risk_coach.agents.analysis_agent import analysis_agent
 from trading_risk_coach.agents.advisor_agent import advisor_agent
 from trading_risk_coach.agents.critic_agent import critic_agent
@@ -13,6 +14,10 @@ from trading_risk_coach.guardrails.safety_rules import sanitize_advice
 
 print("ADK workflow loaded successfully!")
 print(f"Workflow Name: {root_agent.name}")
+print(
+    "Local API Key:"
+    f" {'configured via ' + API_KEY_SOURCE if has_local_api_key() else 'not configured'}"
+)
 
 edge_names = []
 for source, target in root_agent.edges:
