@@ -94,6 +94,8 @@ Example MCP mitigation response:
 }
 ```
 
+An optional interactive visual summary is included in `dashboard.html`. It presents the before/after narrative, the real-data scale, and the ADK/MCP implementation path for a quick evaluator-friendly walkthrough.
+
 ## 6. Security Mechanism
 
 The project uses a zero-trust output safety layer. The model may reason about risk, but final user-facing text is still passed through deterministic Python checks. If text includes patterns such as `加仓.*回本`, `摊平成本`, `扛单`, `all-in`, `martingale`, or `马丁格尔`, the output is replaced with a safety warning.
@@ -148,6 +150,8 @@ Container deployment is supported through `Dockerfile`. The default container co
 - The current guardrail is intentionally conservative and keyword-based. Future versions could add policy versioning and structured safety audits.
 - Future work could include portfolio-level exposure aggregation, richer drawdown analytics, and an operator dashboard.
 
-## 10. Final Positioning
+## 10. Data Privacy and Final Positioning
+
+The repository does not include API keys, `.env`, account credentials, SSH keys, personal filesystem paths, or private integration scripts. The included CSV files are anonymized local exports used only for project demonstration and rubric verification.
 
 Trading Risk Coach is best understood as a **trading behavior risk-control and review assistant**. It does not predict markets, recommend entries, or provide investment advice. Its value is in making risk behavior measurable, auditable, and safer through ADK multi-agent orchestration, MCP tool boundaries, explicit Agent Skill rules, and deterministic safety guardrails.

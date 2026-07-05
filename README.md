@@ -17,6 +17,17 @@ Personal traders often lose money not only because of market direction, but beca
 
 Trading Risk Coach converts these behaviors into measurable risk signals, routes them through a multi-agent workflow, and blocks unsafe advice through deterministic guardrails.
 
+## Data Sources
+
+The project uses anonymized real XAUUSD data for the core demo and tests:
+
+| Data | File | Scope |
+| --- | --- | --- |
+| Trade history | `trading_risk_coach/data/real_trades.csv` | 3,225 paired open/close XAUUSD trades from anonymized MT5 exports. |
+| Market context | `trading_risk_coach/data/XAUUSD_M1.csv` | 173,391 rows of XAUUSD one-minute OHLCV candles. |
+
+See [DATA_PRIVACY.md](DATA_PRIVACY.md) for the privacy boundary. No API keys, `.env` file, account credentials, SSH keys, or machine-specific paths are included in the repository.
+
 ## Architecture
 
 The system implements an Observe -> Think -> Act -> Audit loop:
@@ -61,6 +72,8 @@ More detail: [ARCHITECTURE.md](ARCHITECTURE.md)
 ## Demo Scenario
 
 Full demo walkthrough: [DEMO.md](DEMO.md)
+
+Interactive visual dashboard: [dashboard.html](dashboard.html)
 
 Example user request:
 
@@ -180,10 +193,12 @@ docker run --rm -p 8080:8080 --env-file .env trading-risk-coach adk web trading_
 ```text
 trading-risk-coach/
 ├── ARCHITECTURE.md
+├── DATA_PRIVACY.md
 ├── DEMO.md
 ├── Dockerfile
 ├── KAGGLE_WRITEUP.md
 ├── README.md
+├── dashboard.html
 ├── frontend/
 ├── project_introduction.html
 ├── requirements.txt
