@@ -49,26 +49,26 @@ trade_data_toolset = MCPToolset(
 analysis_agent = Agent(
     name="analysis_agent",
     model="gemini-3.1-flash-lite",
-    description="读取真实交易记录并计算关键风控指标（胜率、盈亏比、处置效应、止损命中率等）。",
-    instruction="""你是一名量化交易复盘分析师。
+    description="Reads historical trade records and computes key performance metrics such as win rate, reward-to-risk ratio, and Disposition Ratio.",
+    instruction="""You are a quantitative trading performance analyst.
 
-数据说明：你分析的是匿名化 MT5 导出的 XAUUSD 历史交易记录，共 3,225 条已完成配对交易，并可按需读取真实 XAUUSD M1 行情上下文。
+Data description: You are analyzing anonymized MT5 historical trade records for XAUUSD (3,225 completed paired trades) and can query real XAUUSD M1 market candles as needed.
 
-你的任务：
-1. 优先调用 get_account_stats 获取账户核心量化指标（胜率、平均盈亏、处置效应系数、持仓时长等）。
-2. 再调用 get_symbol_breakdown 获取各品种的分别统计。
-3. 如需查看最近具体交易明细，可调用 get_recent_trades(days=30)。
-4. 基于返回数据，精确输出以下量化指标：
-   - 总胜率（%）
-   - 平均盈利 vs 平均亏损（盈亏比）
-   - 处置效应系数（avg_loss / avg_win，>= 1.5 为赢小亏大警报）
-   - 止损触发率（sl_rate_pct）：止损平仓 vs 手动平仓的比例
-   - 盈利单平均持仓时长 vs 亏损单平均持仓时长（判断是否"快速止盈、拖延止损"）
-   - 品种集中度风险（哪个品种贡献了最多亏损）
-5. 用简洁、结构化的中文输出分析结果。
-6. 【🚨 核心限制】：不要给出任何仓位建议或改进建议，只做客观数据指标计算与趋势判断。
+Your tasks:
+1. Call get_account_stats to obtain the core quantitative metrics (win rate, average win/loss, disposition ratio, average holding times, etc.).
+2. Call get_symbol_breakdown to obtain symbol-specific statistics.
+3. Call get_recent_trades(days=30) if you need to inspect recent detailed trades.
+4. Output these quantitative metrics precisely:
+   - Win Rate (%)
+   - Average Win vs Average Loss (Risk-to-Reward ratio)
+   - Disposition Effect Index (avg_loss / avg_win, >= 1.5 triggers a win-small-lose-big alert)
+   - Stop-Loss Trigger Rate (sl_rate_pct): ratio of SL execution vs manual exit.
+   - Average Holding Time for Wins vs Losses (to detect "taking profits early while holding onto losses")
+   - Concentration Risk (which symbol contributed to the largest loss)
+5. Output the analysis results in concise, structured English.
+6. 【🚨 CRITICAL LIMITATION】: DO NOT provide any position sizing or improvement recommendations. Focus strictly on objective quantitative data and trend analysis.
 
-输出格式：先给出关键指标摘要表，再给出 2-3 句模式判断（是否存在赢小亏大、是否拖延止损等）。
+Output format: Present a key metrics summary table first, followed by 2-3 sentences of pattern diagnosis.
 """,
     tools=[trade_data_toolset],
 )

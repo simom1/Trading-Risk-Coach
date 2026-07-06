@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trading Risk Coach - Historical Replay Demo</title>
+  <title>Trading Risk Coach - Risk Replay Sandtable</title>
   <style>
     :root {
       --ink: #172033;
@@ -38,9 +38,9 @@
     }
 
     .hero {
-      min-height: 310px;
+      min-height: 280px;
       display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
       gap: 24px;
       align-items: stretch;
       margin-bottom: 22px;
@@ -66,16 +66,16 @@
     }
 
     h1 {
-      font-size: clamp(32px, 5vw, 58px);
-      line-height: 0.98;
-      letter-spacing: 0;
-      margin: 0 0 18px;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
       max-width: 820px;
     }
 
     .hero-copy p {
       color: var(--muted);
-      font-size: 16px;
+      font-size: 15px;
       max-width: 820px;
       margin: 0;
     }
@@ -84,7 +84,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 24px;
+      margin-top: 20px;
       align-items: center;
     }
 
@@ -93,15 +93,24 @@
       border-radius: 8px;
       background: var(--charcoal);
       color: #fff;
-      padding: 12px 18px;
+      padding: 12px 22px;
       font-weight: 800;
       cursor: pointer;
       min-height: 44px;
+      transition: background-color 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--blue);
     }
 
     button.secondary {
       color: var(--ink);
       background: #e7edf3;
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background-color: #d1dbe5;
     }
 
     button:disabled {
@@ -115,10 +124,11 @@
       align-items: center;
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 0 12px;
+      padding: 0 16px;
       color: var(--muted);
       font-size: 13px;
       background: #fbfdff;
+      font-weight: 600;
     }
 
     .hero-media {
@@ -127,7 +137,7 @@
       border-radius: 8px;
       border: 1px solid var(--line);
       background: #111827;
-      min-height: 310px;
+      min-height: 280px;
     }
 
     .hero-media img {
@@ -159,6 +169,83 @@
       font-size: 13px;
     }
 
+    /* Configuration Panel Styling */
+    .config-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 22px;
+    }
+
+    .config-panel h2 {
+      font-size: 18px;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      min-height: auto;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .config-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .config-group label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .config-group select,
+    .config-group input {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 14px;
+      background: #f8fafc;
+      color: var(--ink);
+    }
+
+    .config-group select:focus,
+    .config-group input:focus {
+      outline: none;
+      border-color: var(--blue);
+      background: #fff;
+    }
+
     .metrics {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -185,7 +272,7 @@
     }
 
     .metric .value {
-      font-size: 30px;
+      font-size: 26px;
       font-weight: 900;
       color: var(--ink);
       font-variant-numeric: tabular-nums;
@@ -199,7 +286,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: 360px minmax(0, 1fr);
+      grid-template-columns: 320px minmax(0, 1fr);
       gap: 18px;
       align-items: start;
     }
@@ -239,7 +326,7 @@
 
     .step {
       display: grid;
-      grid-template-columns: 34px minmax(0, 1fr);
+      grid-template-columns: 30px minmax(0, 1fr);
       gap: 10px;
       align-items: start;
       border: 1px solid #edf1f5;
@@ -247,7 +334,7 @@
       padding: 10px;
       background: #fbfdff;
       transition: border-color 0.2s ease, background 0.2s ease;
-      min-height: 70px;
+      min-height: 64px;
     }
 
     .step.active {
@@ -261,9 +348,9 @@
     }
 
     .step .num {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
       background: #e7edf3;
       display: flex;
       align-items: center;
@@ -284,14 +371,14 @@
     }
 
     .step h3 {
-      margin: 0 0 3px;
-      font-size: 14px;
+      margin: 0 0 2px;
+      font-size: 13px;
     }
 
     .step p {
       margin: 0;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .main-stack {
@@ -299,12 +386,30 @@
       gap: 18px;
     }
 
+    /* Live Chart styling */
+    .chart-container {
+      padding: 16px;
+      background: var(--panel);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 250px;
+      display: block;
+      background: #fafbfc;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
     .terminal {
       background: var(--code);
       color: #d1d5db;
       padding: 14px;
       font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      font-size: 13px;
+      font-size: 12px;
       min-height: 236px;
       max-height: 236px;
       overflow: auto;
@@ -354,55 +459,19 @@
     .bar-fill {
       width: 0;
       height: 100%;
-      transition: width 0.7s ease;
+      transition: width 0.3s ease;
     }
 
     .bar-green { background: var(--green); }
     .bar-amber { background: var(--amber); }
     .bar-red { background: var(--red); }
 
-    .events {
-      padding: 16px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .event-card {
-      display: grid;
-      grid-template-columns: 100px minmax(0, 1fr) 120px;
-      gap: 12px;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 12px;
-      background: #fbfdff;
-      opacity: 0.35;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-    }
-
-    .event-card.visible {
-      opacity: 1;
-      transform: translateY(-1px);
-    }
-
-    .ticket {
-      font-weight: 900;
-      font-size: 13px;
-    }
-
-    .event-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
     .badge {
-      justify-self: end;
       border-radius: 999px;
-      padding: 6px 10px;
+      padding: 6px 12px;
       font-size: 12px;
       font-weight: 900;
-      white-space: nowrap;
+      text-transform: uppercase;
     }
 
     .badge.green { color: #064e3b; background: #d1fae5; }
@@ -412,6 +481,7 @@
     .report {
       padding: 16px;
       display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
 
@@ -420,7 +490,6 @@
       border-radius: 8px;
       background: #fbfdff;
       padding: 14px;
-      min-height: 132px;
     }
 
     .report-box h3 {
@@ -431,7 +500,8 @@
     .report-box p,
     .report-box li {
       color: var(--muted);
-      font-size: 14px;
+      font-size: 13.5px;
+      margin: 6px 0;
     }
 
     .report-box ul {
@@ -440,21 +510,18 @@
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     @media (max-width: 980px) {
       .hero,
-      .grid {
+      .grid,
+      .report {
         grid-template-columns: 1fr;
       }
 
       .metrics {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .hero-media {
-        min-height: 240px;
       }
     }
 
@@ -466,182 +533,231 @@
       .metrics {
         grid-template-columns: 1fr;
       }
-
-      .event-card {
-        grid-template-columns: 1fr;
-      }
-
-      .badge {
-        justify-self: start;
-      }
-
-      .bar-row {
-        grid-template-columns: 1fr;
-        gap: 6px;
-      }
     }
   </style>
 </head>
 <body>
   <main class="shell">
+    <!-- Top Navigation Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 1.25rem;">⚡</span>
+        <strong style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; letter-spacing: -0.2px; background: linear-gradient(90deg, #60a5fa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Trading Risk Coach</strong>
+      </div>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <a href="project_introduction.html" style="color: var(--ink); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.4rem 0.8rem; border-radius: 4px; transition: all 0.2s;">Technical Docs</a>
+        <a href="replay_demo.html" style="color: #60a5fa; background: rgba(59, 130, 246, 0.1); text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 4px;">Replay Sandtable</a>
+        <a href="dashboard.html" style="color: var(--ink); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.4rem 0.8rem; border-radius: 4px; transition: all 0.2s;">KPI Dashboard</a>
+        <a href="presentation.html" style="color: var(--ink); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.4rem 0.8rem; border-radius: 4px; transition: all 0.2s;">Video Slides</a>
+      </div>
+    </div>
     <section class="hero">
       <div class="hero-copy">
         <div>
-          <div class="eyebrow">Kaggle Capstone Demo</div>
-          <h1>Historical Risk Replay</h1>
+          <div class="eyebrow">Trading Risk Coach Copilot</div>
+          <h1>Market & Position Replay Simulator</h1>
           <p>
-            点击开始后，页面会自动演示 Trading Risk Coach 如何读取匿名化交易记录和真实 XAUUSD M1 行情，
-            再用 ADK 多智能体与 MCP 工具回放历史持仓路径，模拟硬止损、熔断和平稳观察动作。
+            Replay XAUUSD positions and M1 price paths to simulate risk-control decisions. Select a historical losing trade to audit, or customize positions to observe Three-Value risk logic (Green Safe, Yellow Guard, Red Breaker) in action.
           </p>
         </div>
         <div class="hero-actions">
-          <button id="startBtn">开始演示</button>
-          <button id="resetBtn" class="secondary">重置</button>
-          <span id="runState" class="status-pill">Ready: historical replay, not live broker execution</span>
+          <button id="startBtn">Start Replay</button>
+          <button id="resetBtn" class="secondary">Reset</button>
+          <span id="runState" class="status-pill">System Ready, Waiting</span>
         </div>
       </div>
       <div class="hero-media">
         <img src="cover.jpg" alt="Trading Risk Coach cover">
         <div class="media-overlay">
-          <strong>安全边界</strong>
-          <span>当前版本不连接真实账户；主动风控是基于历史行情的 what-if 回放模拟。</span>
+          <strong>Visual Risk Backtest</strong>
+          <span>Verify stop-loss execution and averaging-down protection on 1-minute gold candles.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Configuration Settings Panel -->
+    <section class="config-panel">
+      <h2>⚙️ Risk Simulation Config Parameters</h2>
+      <div class="mode-tabs">
+        <button id="tabReal" class="tab-btn active">Real History Case Audit</button>
+        <button id="tabCustom" class="tab-btn">Custom Position Simulation</button>
+      </div>
+
+      <div class="config-grid">
+        <!-- Real Cases Select -->
+        <div class="config-group" id="groupRealCase">
+          <label for="realCaseSelect">Select Historical Losing Case</label>
+          <select id="realCaseSelect">
+            <option value="817860">Case #817860 - SELL Weekend Gap Loss -$14,935.14 (Lot: 1.14, Entry: 5030.00)</option>
+            <option value="1210847">Case #1210847 - BUY Heavy Drawdown Loss -$5,467.00 (Lot: 2.84, Entry: 5166.15)</option>
+            <option value="1195917">Case #1195917 - SELL Adverse Excursion Loss -$12,675.52 (Lot: 5.54, Entry: 5119.20)</option>
+            <option value="269485">Case #269485 - SELL Quick Flush HitSL Loss -$8,277.00 (Lot: 3.00, Entry: 4702.41)</option>
+            <option value="1191984">Case #1191984 - BUY Short Sharp HitSL Loss -$4,578.00 (Lot: 4.36, Entry: 5161.23)</option>
+          </select>
+        </div>
+
+        <!-- Custom Inputs (hidden by default) -->
+        <div class="config-group hidden" id="groupDirection">
+          <label for="customDir">Direction</label>
+          <select id="customDir">
+            <option value="B">Buy (Long)</option>
+            <option value="S">Sell (Short)</option>
+          </select>
+        </div>
+        <div class="config-group hidden" id="groupLot">
+          <label for="customLot">Lot Size</label>
+          <input type="number" id="customLot" value="1.0" min="0.01" step="0.1">
+        </div>
+        <div class="config-group hidden" id="groupEntry">
+          <label for="customEntry">Open Price</label>
+          <input type="number" id="customEntry" value="5100.0" step="1.0">
+        </div>
+        <div class="config-group hidden" id="groupClose">
+          <label for="customClose">Expected Close Price</label>
+          <input type="number" id="customClose" value="5070.0" step="1.0">
+        </div>
+
+        <!-- Common Risk Controls -->
+        <div class="config-group">
+          <label for="slPoints" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Yellow Alert: Hard Stop-Loss (Points)</span>
+            <small id="actualSLInfo" style="color: var(--cyan); font-weight: 500; font-size: 11px;"></small>
+          </label>
+          <input type="number" id="slPoints" value="5.0" min="1" step="0.5">
+        </div>
+        <div class="config-group">
+          <label for="breakerPoints" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Red Breaker: Liquidation (Points)</span>
+            <small id="breakerSLInfo" style="color: var(--ink); font-weight: 500; font-size: 11px;"></small>
+          </label>
+          <input type="number" id="breakerPoints" value="10.0" min="2" step="0.5">
         </div>
       </div>
     </section>
 
     <section class="metrics" aria-label="Core metrics">
       <div class="metric">
-        <label>Trade Records</label>
-        <div class="value" data-count="3225">0</div>
-        <small>paired XAUUSD trades</small>
+        <label>Direction / Lot Size</label>
+        <div class="value" id="metricPosInfo">SELL / 1.14 Lots</div>
+        <small id="metricTimes">Entry Price: 5030.0</small>
       </div>
       <div class="metric">
-        <label>M1 Candles</label>
-        <div class="value" data-count="173391">0</div>
-        <small>real market candles</small>
+        <label>Actual Final PnL</label>
+        <div class="value" id="metricActualPnL" style="color: var(--red);">-$14,935.14</div>
+        <small>Without AI Risk Intervention</small>
       </div>
       <div class="metric">
-        <label>Win Rate</label>
-        <div class="value" data-count="55.8" data-suffix="%">0%</div>
-        <small>last 90 days replay window</small>
+        <label>System Replay PnL</label>
+        <div class="value" id="metricReplayPnL">-$0.00</div>
+        <small>Simulated Protected PnL</small>
       </div>
       <div class="metric">
-        <label>Replay Actions</label>
-        <div class="value" data-count="9">0</div>
-        <small>7 hard stops + 2 breakers</small>
+        <label>Risk Loss Saved</label>
+        <div class="value" id="metricSaved" style="color: var(--green);">$0.00</div>
+        <small>Avoided Catastrophic Drawdown</small>
       </div>
     </section>
 
     <section class="grid">
       <aside class="panel">
         <div class="panel-head">
-          <h2>Workflow</h2>
+          <h2>Workflow Timeline</h2>
           <span>ADK + MCP</span>
         </div>
         <div class="timeline">
           <div class="step" data-step="0">
             <div class="num">1</div>
             <div>
-              <h3>Load Data</h3>
-              <p>读取 real_trades.csv 与 XAUUSD_M1.csv</p>
+              <h3>Fetch Position & Market</h3>
+              <p>Read real_trades.csv & query M1 candles</p>
             </div>
           </div>
           <div class="step" data-step="1">
             <div class="num">2</div>
             <div>
-              <h3>Analysis Agent</h3>
-              <p>计算胜率、盈亏、处置效应与止损率</p>
+              <h3>Quant Metric Analysis</h3>
+              <p>Analyze current PnL & cognitive bias index</p>
             </div>
           </div>
           <div class="step" data-step="2">
             <div class="num">3</div>
             <div>
-              <h3>Advisor Agent</h3>
-              <p>调用 historical replay MCP 工具</p>
+              <h3>Risk Rule Diagnosis</h3>
+              <p>Query wind-control rules from SKILL.md</p>
             </div>
           </div>
           <div class="step" data-step="3">
             <div class="num">4</div>
             <div>
-              <h3>Replay Risk Controls</h3>
-              <p>分类 keep / hard stop / breaker</p>
+              <h3>Historical Replay</h3>
+              <p>Dynamic tracking of adverse excursions (MAE)</p>
             </div>
           </div>
           <div class="step" data-step="4">
             <div class="num">5</div>
             <div>
-              <h3>Guardrail</h3>
-              <p>拦截加仓回本、扛单、马丁格尔</p>
+              <h3>Security Guardrail Check</h3>
+              <p>Intercept gambling and recovery bias text</p>
             </div>
           </div>
           <div class="step" data-step="5">
             <div class="num">6</div>
             <div>
-              <h3>Critic Agent</h3>
-              <p>输出最终量化风控意见书</p>
+              <h3>Audit Opinion Signed</h3>
+              <p>Critic Agent signs final audit report</p>
             </div>
           </div>
         </div>
       </aside>
 
       <div class="main-stack">
+        <!-- Live Price Chart Panel -->
         <section class="panel">
           <div class="panel-head">
-            <h2>Runtime Console</h2>
+            <h2>Position Market Replay Curve</h2>
+            <span id="chartStatus" class="badge green">Green Safe</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="priceChart" width="700" height="250"></canvas>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Risk Console (Runtime Console)</h2>
             <span id="elapsed">00:00</span>
           </div>
           <div id="terminal" class="terminal"></div>
         </section>
 
-        <section class="panel">
-          <div class="panel-head">
-            <h2>Replay Action Distribution</h2>
-            <span>30 historical trades</span>
-          </div>
-          <div class="bars">
-            <div class="bar-row">
-              <div class="bar-label">Keep watching</div>
-              <div class="bar-track"><div id="barKeep" class="bar-fill bar-green"></div></div>
-              <strong id="keepCount">0</strong>
-            </div>
-            <div class="bar-row">
-              <div class="bar-label">Set hard SL</div>
-              <div class="bar-track"><div id="barSl" class="bar-fill bar-amber"></div></div>
-              <strong id="slCount">0</strong>
-            </div>
-            <div class="bar-row">
-              <div class="bar-label">Emergency close</div>
-              <div class="bar-track"><div id="barClose" class="bar-fill bar-red"></div></div>
-              <strong id="closeCount">0</strong>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-head">
-            <h2>Sample Replay Events</h2>
-            <span>what-if simulation</span>
-          </div>
-          <div id="events" class="events"></div>
-        </section>
-
+        <!-- Zero-Trust Auditor report -->
         <section id="finalReport" class="panel hidden">
           <div class="panel-head">
-            <h2>Final Safe Report</h2>
-            <span>Critic Agent output</span>
+            <h2>🛡️ Quantitative Risk Audit Report</h2>
+            <span>Critic Agent Certified (Real Google Gemini API Response)</span>
           </div>
-          <div class="report">
-            <div class="report-box">
-              <h3>Risk State</h3>
-              <p>历史回放显示 30 笔交易中有 7 次触发硬止损模拟，2 次触发熔断模拟。当前演示不是实时账户执行，而是基于真实 M1 行情的回放风控证明。</p>
+          <div class="report" style="grid-template-columns: 1fr; gap: 12px; padding: 16px;">
+            <div class="report-box" style="min-height: 200px;">
+              <h3 style="display: flex; align-items: center; gap: 8px;">
+                🤖 Gemini 3.1 Flash-Lite Multi-Agent Report (Real-time Feedback)
+              </h3>
+              <div id="geminiOutput" style="white-space: pre-wrap; font-family: monospace, Courier, monospace; font-size: 13px; line-height: 1.6; background: #fafbfc; border: 1px solid var(--line); border-radius: 6px; padding: 14px; max-height: 450px; overflow: auto; color: var(--ink);">
+                Awaiting multi-agent workflow audit opinion from Google Gemini API...
+              </div>
             </div>
-            <div class="report-box">
-              <h3>Advisor Guidance</h3>
-              <ul>
-                <li>用硬止损和熔断阈值替代临场情绪决策。</li>
-                <li>对历史大幅逆向波动交易做复盘，识别拖延止损行为。</li>
-                <li>禁止加仓回本、扛单等待反弹、马丁格尔加倍下注。</li>
-              </ul>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 8px;">
+              <div class="report-box">
+                <h3>Risk Execution Summary</h3>
+                <ul>
+                  <li id="reportMaxAdverse">Maximum Adverse Excursion (MAE): -</li>
+                  <li id="reportResultStatus">Decision Trigger Status: -</li>
+                  <li id="reportDeltaPnL">PnL Comparison Improvement: -</li>
+                </ul>
+              </div>
+              <div class="report-box">
+                <h3>Wind-Control System Rules</h3>
+                <p id="reportActionSummary">The system has replayed the trade path based on your parameters.</p>
+              </div>
             </div>
           </div>
         </section>
@@ -650,91 +766,403 @@
   </main>
 
   <script>
-    const replay = {
-      stats: {
-        trades: 3225,
-        candles: 173391,
-        winRate: 55.8,
-        accountStatsTrades: 1842,
-        dispositionRatio: 0.84,
-        stopLossRate: 33.4
+    // Embedded 5 worst historical cases with downsampled market prices (from XAUUSD_M1.csv)
+    const historicalCases = {
+      "817860": {
+        id: "817860",
+        direction: "S",
+        lot_size: 1.14,
+        open_price: 5030.0,
+        close_price: 5161.01,
+        open_time: "2026-02-21 01:37",
+        close_time: "2026-02-23 16:05",
+        actual_pnl: -14935.14,
+        status: "closed_manual",
+        path: [
+          5107.44, 5143.25, 5152.27, 5152.05, 5142.29, 5140.98, 5146.13, 5158.94,
+          5166.11, 5162.59, 5161.75, 5174.59, 5173.66, 5164.45, 5169.68, 5160.52,
+          5160.43, 5160.91, 5154.93, 5155.23, 5157.17, 5158.77, 5156.15, 5148.87,
+          5148.55, 5131.26, 5136.9,  5138.46, 5130.88, 5140.77, 5145.89, 5144.36,
+          5147.07, 5152.58, 5152.67, 5162.87, 5149.66, 5150.51, 5152.79, 5150.83,
+          5162.16, 5160.35, 5148.9,  5153.13, 5150.02, 5161.01
+        ]
       },
-      actions: {
-        keep_watching: 21,
-        set_hard_sl: 7,
-        emergency_close: 2
+      "1210847": {
+        id: "1210847",
+        direction: "B",
+        lot_size: 2.84,
+        open_price: 5166.15,
+        close_price: 5146.9,
+        open_time: "2026-03-05 19:31",
+        close_time: "2026-03-05 23:10",
+        actual_pnl: -5467.0,
+        status: "closed_sl",
+        path: [
+          5069.82, 5058.54, 5060.98, 5068.5, 5065.03, 5059.32, 5061.34, 5063.69,
+          5069.92, 5074.39, 5067.7,  5061.9,  5079.19, 5071.26, 5080.82, 5080.76,
+          5071.68, 5069.74, 5074.23, 5076.11, 5073.93, 5066.56, 5064.87, 5065.19,
+          5063.65, 5060.02, 5060.48, 5069.01, 5068.98, 5063.58, 5068.55, 5066.18,
+          5069.54, 5082.35, 5086.41, 5084.4,  5078.28, 5077.63, 5076.48, 5077.63,
+          5076.78, 5076.75, 5078.86, 5083.91, 5075.22, 5146.9
+        ]
       },
-      events: [
-        {
-          id: "26628292",
-          action: "keep_watching",
-          state: "GREEN_SAFE",
-          adverse: 1.08,
-          actual: 386.61,
-          delta: 0
-        },
-        {
-          id: "26688949",
-          action: "set_hard_sl",
-          state: "YELLOW_WATCH",
-          adverse: 3.27,
-          actual: -17.48,
-          delta: 11.48
-        },
-        {
-          id: "26907103",
-          action: "emergency_close",
-          state: "RED_BREAKER",
-          adverse: 143.24,
-          actual: -17.36,
-          delta: 5.36
-        },
-        {
-          id: "27215994",
-          action: "set_hard_sl",
-          state: "YELLOW_WATCH",
-          adverse: 3.64,
-          actual: -13.66,
-          delta: 7.66
-        },
-        {
-          id: "27219946",
-          action: "keep_watching",
-          state: "GREEN_SAFE",
-          adverse: 0.98,
-          actual: -20.32,
-          delta: 0
-        }
-      ]
+      "1195917": {
+        id: "1195917",
+        direction: "S",
+        lot_size: 5.54,
+        open_price: 5119.2,
+        close_price: 5142.08,
+        open_time: "2026-03-05 16:12",
+        close_time: "2026-03-05 18:22",
+        actual_pnl: -12675.52,
+        status: "closed_manual",
+        path: [
+          5117.74, 5113.42, 5104.41, 5105.15, 5112.24, 5115.43, 5115.46, 5108.28,
+          5116.73, 5097.84, 5098.52, 5099.95, 5105.41, 5098.94, 5102.65, 5102.83,
+          5102.43, 5115.73, 5095.25, 5065.95, 5072.16, 5085.51, 5087.96, 5085.81,
+          5084.21, 5076.54, 5086.77, 5088.06, 5090.15, 5089.65, 5083.38, 5081.92,
+          5087.38, 5088.13, 5090.54, 5097.38, 5097.43, 5099.25, 5093.97, 5085.31,
+          5079.97, 5083.02, 5077.17, 5077.91, 5072.71, 5142.08
+        ]
+      },
+      "269485": {
+        id: "269485",
+        direction: "S",
+        lot_size: 3.0,
+        open_price: 4702.41,
+        close_price: 4730.0,
+        open_time: "2026-02-02 19:47",
+        close_time: "2026-02-02 19:55",
+        actual_pnl: -8277.0,
+        status: "closed_sl",
+        path: [
+          4673.37, 4679.98, 4675.52, 4676.37, 4685.84, 4683.62, 4674.02, 4681.31, 4730.0
+        ]
+      },
+      "1191984": {
+        id: "1191984",
+        direction: "B",
+        lot_size: 4.36,
+        open_price: 5161.23,
+        close_price: 5150.73,
+        open_time: "2026-03-05 15:51",
+        close_time: "2026-03-05 15:58",
+        actual_pnl: -4578.0,
+        status: "closed_sl",
+        path: [
+          5127.59, 5125.48, 5121.87, 5115.89, 5119.1, 5115.41, 5113.34, 5150.73
+        ]
+      }
     };
 
-    const logs = [
-      { step: 0, cls: "info", text: "Loading anonymized MT5 exports: real_trades.csv" },
-      { step: 0, cls: "ok", text: "Loaded 3,225 paired XAUUSD trades and 173,391 M1 candles." },
-      { step: 1, cls: "info", text: "analysis_agent: get_account_stats(symbol='XAUUSD', days=90)" },
-      { step: 1, cls: "ok", text: "win_rate=55.8%, disposition_ratio=0.84, sl_rate=33.4%" },
-      { step: 2, cls: "info", text: "advisor_agent: applying SKILL.md thresholds and three-state risk policy." },
-      { step: 2, cls: "warn", text: "requesting simulate_historical_risk_replay(limit=30, hard_stop=3, breaker=6)" },
-      { step: 3, cls: "ok", text: "replay actions: keep_watching=21, set_hard_sl=7, emergency_close=2" },
-      { step: 3, cls: "warn", text: "historical replay mode: no live broker connection, no real order placement." },
-      { step: 4, cls: "info", text: "safety_rules.py: scanning for averaging-down, holding-loss, Martingale language." },
-      { step: 4, cls: "ok", text: "guardrail passed: unsafe recovery advice blocked before final output." },
-      { step: 5, cls: "ok", text: "critic_agent: final quantitative risk report generated." }
-    ];
+    // DOM References
+    const tabReal = document.getElementById("tabReal");
+    const tabCustom = document.getElementById("tabCustom");
+    const groupRealCase = document.getElementById("groupRealCase");
+    const groupDirection = document.getElementById("groupDirection");
+    const groupLot = document.getElementById("groupLot");
+    const groupEntry = document.getElementById("groupEntry");
+    const groupClose = document.getElementById("groupClose");
+
+    const realCaseSelect = document.getElementById("realCaseSelect");
+    const customDir = document.getElementById("customDir");
+    const customLot = document.getElementById("customLot");
+    const customEntry = document.getElementById("customEntry");
+    const customClose = document.getElementById("customClose");
+    const slPoints = document.getElementById("slPoints");
+    const breakerPoints = document.getElementById("breakerPoints");
 
     const startBtn = document.getElementById("startBtn");
     const resetBtn = document.getElementById("resetBtn");
-    const terminal = document.getElementById("terminal");
     const runState = document.getElementById("runState");
+    const terminal = document.getElementById("terminal");
     const elapsed = document.getElementById("elapsed");
     const finalReport = document.getElementById("finalReport");
-    const eventHost = document.getElementById("events");
+    const chartStatus = document.getElementById("chartStatus");
+
+    // Metric DOMs
+    const metricPosInfo = document.getElementById("metricPosInfo");
+    const metricTimes = document.getElementById("metricTimes");
+    const metricActualPnL = document.getElementById("metricActualPnL");
+    const metricReplayPnL = document.getElementById("metricReplayPnL");
+    const metricSaved = document.getElementById("metricSaved");
+
+    // Report DOMs
+    const reportActionSummary = document.getElementById("reportActionSummary");
+    const reportMaxAdverse = document.getElementById("reportMaxAdverse");
+    const reportResultStatus = document.getElementById("reportResultStatus");
+    const reportDeltaPnL = document.getElementById("reportDeltaPnL");
+
+    // Chart Canvas References
+    const canvas = document.getElementById("priceChart");
+    const ctx = canvas.getContext("2d");
+
+    // Simulation Variables
+    let currentMode = "real"; // "real" or "custom"
+    let simActive = false;
+    let simIndex = 0;
+    let simPath = [];
+    let simDirection = "S";
+    let simLot = 1.14;
+    let simEntry = 5030.0;
+    let simClose = 5161.01;
+    let simActualPnL = -14935.14;
+    let simSL = 5.0;
+    let simBreaker = 10.0;
+    let simMaxAdverseExcursion = 0;
+    let simCurrentState = "GREEN_SAFE";
+    let simCurrentAction = "keep_watching";
+    let simReplayPnL = 0;
     let timers = [];
     let startedAt = null;
+    let lastSelectedCase = null;
 
-    function fmt(n, suffix = "") {
-      if (Number.isInteger(n)) return n.toLocaleString() + suffix;
-      return n.toLocaleString(undefined, { maximumFractionDigits: 1 }) + suffix;
+    // Tab Switching Logic
+    tabReal.addEventListener("click", () => {
+      tabReal.classList.add("active");
+      tabCustom.classList.remove("active");
+      groupRealCase.classList.remove("hidden");
+      groupDirection.classList.add("hidden");
+      groupLot.classList.add("hidden");
+      groupEntry.classList.add("hidden");
+      groupClose.classList.add("hidden");
+      currentMode = "real";
+      updateMetricsPreview();
+    });
+
+    tabCustom.addEventListener("click", () => {
+      tabReal.classList.remove("active");
+      tabCustom.classList.add("active");
+      groupRealCase.classList.add("hidden");
+      groupDirection.classList.remove("hidden");
+      groupLot.classList.remove("hidden");
+      groupEntry.classList.remove("hidden");
+      groupClose.classList.remove("hidden");
+      currentMode = "custom";
+      updateMetricsPreview();
+    });
+
+    // Inputs Change Hook
+    [realCaseSelect, customDir, customLot, customEntry, customClose, slPoints, breakerPoints].forEach(el => {
+      el.addEventListener("change", updateMetricsPreview);
+      el.addEventListener("input", updateMetricsPreview);
+    });
+
+    // Generate price path for custom simulation (random walk with drift)
+    function generatePath(entry, close, steps = 40) {
+      let path = [];
+      let step_size = (close - entry) / steps;
+      let current = entry;
+      // Inject some volatility swing to make the walk realistic
+      let vol = Math.abs(close - entry) * 0.15 || 5.0;
+      for (let i = 0; i <= steps; i++) {
+        let noise = (Math.random() - 0.45) * vol;
+        current += step_size + noise;
+        path.push(Number(current.toFixed(2)));
+      }
+      path[0] = Number(entry.toFixed(2));
+      path[steps] = Number(close.toFixed(2));
+      return path;
+    }
+
+    // Update the metrics preview cards at rest state
+    function updateMetricsPreview() {
+      if (simActive) return;
+
+      let itemStatus = "closed_manual";
+      let caseChanged = false;
+
+      if (currentMode === "real") {
+        const item = historicalCases[realCaseSelect.value];
+        if (item) {
+          simDirection = item.direction;
+          simLot = item.lot_size;
+          simEntry = item.open_price;
+          simClose = item.close_price;
+          simActualPnL = item.actual_pnl;
+          simPath = [...item.path];
+          itemStatus = item.status || "closed_manual";
+          
+          if (realCaseSelect.value !== lastSelectedCase) {
+            lastSelectedCase = realCaseSelect.value;
+            caseChanged = true;
+          }
+        }
+      } else {
+        simDirection = customDir.value;
+        simLot = Number(customLot.value) || 1.0;
+        simEntry = Number(customEntry.value) || 5100.0;
+        simClose = Number(customClose.value) || 5080.0;
+        // PnL: (Close - Entry) * lot * 100
+        let pnlDir = simDirection === "B" ? 1 : -1;
+        simActualPnL = (simClose - simEntry) * simLot * 100 * pnlDir;
+        simPath = generatePath(simEntry, simClose, 40);
+        itemStatus = "custom";
+        lastSelectedCase = null;
+      }
+
+      const actualSLInfo = document.getElementById("actualSLInfo");
+      const breakerSLInfo = document.getElementById("breakerSLInfo");
+
+      if (currentMode === "real") {
+        if (itemStatus === "closed_sl") {
+          let actualSL = Math.abs(simEntry - simClose);
+          if (caseChanged) {
+            slPoints.value = actualSL.toFixed(2);
+            // Default breaker is 1.5x of stop loss or at least 10 points
+            breakerPoints.value = Math.max(10.0, actualSL * 1.5).toFixed(2);
+          }
+          actualSLInfo.textContent = `(Order SL: ${actualSL.toFixed(2)} pts)`;
+          breakerSLInfo.textContent = `(Breaker auto-aligned)`;
+        } else {
+          if (caseChanged) {
+            slPoints.value = "5.0";
+            breakerPoints.value = "10.0";
+          }
+          actualSLInfo.textContent = `(No actual stop-loss set)`;
+          breakerSLInfo.textContent = `(Coach set breaker)`;
+        }
+      } else {
+        actualSLInfo.textContent = `(Custom sim SL)`;
+        breakerSLInfo.textContent = `(Custom sim Breaker)`;
+      }
+
+      simSL = Number(slPoints.value) || 5.0;
+      simBreaker = Number(breakerPoints.value) || 10.0;
+
+      // Update UI cards
+      metricPosInfo.textContent = `${simDirection === "B" ? "BUY" : "SELL"} / ${simLot}手`;
+      metricTimes.textContent = `开仓价: ${simEntry.toFixed(2)}`;
+      metricActualPnL.textContent = `$${simActualPnL.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      metricActualPnL.style.color = simActualPnL < 0 ? "var(--red)" : "var(--green)";
+      
+      metricReplayPnL.textContent = "-";
+      metricSaved.textContent = "-";
+      metricSaved.style.color = "var(--ink)";
+
+      drawChart(0); // Draw initial static line showing starting point
+    }
+
+    // Render Canvas line chart
+    function drawChart(currentIndex) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw grid
+      ctx.strokeStyle = "#eef2f6";
+      ctx.lineWidth = 1;
+      for (let i = 50; i < canvas.width; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
+      }
+      for (let i = 25; i < canvas.height; i += 25) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+      }
+
+      if (simPath.length === 0) return;
+
+      // Scale calculations
+      let slPrice = simDirection === "B" ? simEntry - simSL : simEntry + simSL;
+      let breakerPrice = simDirection === "B" ? simEntry - simBreaker : simEntry + simBreaker;
+      
+      // Collect all key points to ensure they fit within chart bounds
+      let visiblePoints = simPath.slice(0, currentIndex + 1);
+      if (visiblePoints.length === 0) visiblePoints = [simEntry];
+      let scalePoints = [...simPath, simEntry, slPrice, breakerPrice];
+      let minP = Math.min(...scalePoints);
+      let maxP = Math.max(...scalePoints);
+      let rangeP = maxP - minP || 1;
+      
+      minP -= rangeP * 0.08;
+      maxP += rangeP * 0.08;
+      rangeP = maxP - minP;
+
+      const paddingLeft = 30;
+      const paddingRight = 95;
+      const paddingTop = 20;
+      const paddingBottom = 20;
+
+      function getX(idx) {
+        return (idx / (simPath.length - 1)) * (canvas.width - paddingLeft - paddingRight) + paddingLeft;
+      }
+      function getY(val) {
+        return canvas.height - ((val - minP) / rangeP) * (canvas.height - paddingTop - paddingBottom) - paddingBottom;
+      }
+
+      // Draw Horizontals
+      ctx.lineWidth = 1.2;
+      ctx.font = "10px sans-serif";
+
+      // 1. Entry Line (Dashed Slate)
+      ctx.strokeStyle = "#94a3b8";
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, getY(simEntry));
+      ctx.lineTo(canvas.width - paddingRight + 10, getY(simEntry));
+      ctx.stroke();
+      ctx.fillStyle = "#64748b";
+      ctx.fillText(`开仓点: ${simEntry.toFixed(2)}`, canvas.width - paddingRight + 15, getY(simEntry) + 3);
+
+      // 2. Stop Loss Line (Dashed Orange)
+      ctx.strokeStyle = "#f59e0b";
+      ctx.beginPath();
+      ctx.moveTo(0, getY(slPrice));
+      ctx.lineTo(canvas.width - paddingRight + 10, getY(slPrice));
+      ctx.stroke();
+      ctx.fillStyle = "#d97706";
+      ctx.fillText(`警告SL: ${slPrice.toFixed(2)}`, canvas.width - paddingRight + 15, getY(slPrice) + 3);
+
+      // 3. Breaker Line (Dashed Red)
+      ctx.strokeStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.moveTo(0, getY(breakerPrice));
+      ctx.lineTo(canvas.width - paddingRight + 10, getY(breakerPrice));
+      ctx.stroke();
+      ctx.fillStyle = "#dc2626";
+      ctx.fillText(`熔断HL: ${breakerPrice.toFixed(2)}`, canvas.width - paddingRight + 15, getY(breakerPrice) + 3);
+      ctx.setLineDash([]); // Reset dash
+
+      // Draw price path up to current index
+      ctx.strokeStyle = "var(--blue)";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(getX(0), getY(simPath[0]));
+      for (let i = 1; i <= currentIndex; i++) {
+        ctx.lineTo(getX(i), getY(simPath[i]));
+      }
+      ctx.stroke();
+
+      // Fill gradient under price path
+      let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, "rgba(37, 99, 235, 0.16)");
+      gradient.addColorStop(1, "rgba(37, 99, 235, 0.0)");
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.moveTo(getX(0), canvas.height);
+      for (let i = 0; i <= currentIndex; i++) {
+        ctx.lineTo(getX(i), getY(simPath[i]));
+      }
+      ctx.lineTo(getX(currentIndex), canvas.height);
+      ctx.closePath();
+      ctx.fill();
+
+      // Draw current status circle on latest point
+      let currentVal = simPath[currentIndex];
+      let dotColor = "var(--blue)";
+      if (simCurrentState === "YELLOW_WATCH") dotColor = "var(--amber)";
+      if (simCurrentState === "RED_BREAKER") dotColor = "var(--red)";
+      
+      ctx.fillStyle = dotColor;
+      ctx.beginPath();
+      ctx.arc(getX(currentIndex), getY(currentVal), 6, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
     }
 
     function setStep(index) {
@@ -745,104 +1173,341 @@
       });
     }
 
-    function appendLog(item) {
+    function appendLog(text, cls = "info") {
       const line = document.createElement("div");
-      line.className = `line ${item.cls}`;
-      const seconds = Math.floor((Date.now() - startedAt) / 1000);
-      line.innerHTML = `<span class="time">00:${String(seconds).padStart(2, "0")}</span>${item.text}`;
+      line.className = `line ${cls}`;
+      const seconds = startedAt ? Math.floor((Date.now() - startedAt) / 1000) : 0;
+      line.innerHTML = `<span class="time">00:${String(seconds).padStart(2, "0")}</span>${text}`;
       terminal.appendChild(line);
       terminal.scrollTop = terminal.scrollHeight;
       elapsed.textContent = `00:${String(seconds).padStart(2, "0")}`;
     }
 
-    function countMetrics() {
-      document.querySelectorAll("[data-count]").forEach((el) => {
-        const target = Number(el.dataset.count);
-        const suffix = el.dataset.suffix || "";
-        const duration = 800;
-        const start = performance.now();
-        function tick(now) {
-          const progress = Math.min((now - start) / duration, 1);
-          const value = target * progress;
-          el.textContent = fmt(progress === 1 ? target : value, suffix);
-          if (progress < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      });
-    }
-
-    function renderBars() {
-      document.getElementById("keepCount").textContent = replay.actions.keep_watching;
-      document.getElementById("slCount").textContent = replay.actions.set_hard_sl;
-      document.getElementById("closeCount").textContent = replay.actions.emergency_close;
-      document.getElementById("barKeep").style.width = `${(replay.actions.keep_watching / 30) * 100}%`;
-      document.getElementById("barSl").style.width = `${(replay.actions.set_hard_sl / 30) * 100}%`;
-      document.getElementById("barClose").style.width = `${(replay.actions.emergency_close / 30) * 100}%`;
-    }
-
-    function renderEvents() {
-      eventHost.innerHTML = "";
-      replay.events.forEach((event, index) => {
-        const card = document.createElement("div");
-        const tone = event.action === "keep_watching" ? "green" : event.action === "set_hard_sl" ? "amber" : "red";
-        card.className = "event-card";
-        card.innerHTML = `
-          <div class="ticket">#${event.id}</div>
-          <div>
-            <strong>${event.state}</strong>
-            <p>max adverse ${event.adverse} pts · actual PnL $${event.actual.toFixed(2)} · replay delta $${event.delta.toFixed(2)}</p>
-          </div>
-          <div class="badge ${tone}">${event.action}</div>
-        `;
-        eventHost.appendChild(card);
-        timers.push(setTimeout(() => card.classList.add("visible"), 3400 + index * 260));
-      });
-    }
-
     function resetDemo() {
       timers.forEach(clearTimeout);
       timers = [];
+      simActive = false;
+      simIndex = 0;
+      simMaxAdverseExcursion = 0;
+      simCurrentState = "GREEN_SAFE";
+      simCurrentAction = "keep_watching";
+      simReplayPnL = 0;
       startedAt = null;
+
       terminal.innerHTML = "";
-      eventHost.innerHTML = "";
       finalReport.classList.add("hidden");
       elapsed.textContent = "00:00";
-      runState.textContent = "Ready: historical replay, not live broker execution";
+      runState.textContent = "Ready: Waiting to start replay";
       startBtn.disabled = false;
+      chartStatus.textContent = "GREEN_SAFE";
+      chartStatus.className = "badge green";
+
       document.querySelectorAll(".step").forEach((step) => step.classList.remove("active", "done"));
-      document.querySelectorAll("[data-count]").forEach((el) => {
-        const suffix = el.dataset.suffix || "";
-        el.textContent = "0" + suffix;
-      });
-      ["barKeep", "barSl", "barClose"].forEach((id) => document.getElementById(id).style.width = "0");
-      ["keepCount", "slCount", "closeCount"].forEach((id) => document.getElementById(id).textContent = "0");
+      updateMetricsPreview();
     }
 
     function startDemo() {
       resetDemo();
+      simActive = true;
       startBtn.disabled = true;
       startedAt = Date.now();
-      runState.textContent = "Running historical replay simulation...";
-      countMetrics();
-      renderEvents();
+      runState.textContent = "Connecting to local Python API server...";
 
-      logs.forEach((item, index) => {
-        timers.push(setTimeout(() => {
-          setStep(item.step);
-          appendLog(item);
-          if (index === 6) renderBars();
-          if (index === logs.length - 1) {
-            setStep(6);
-            finalReport.classList.remove("hidden");
-            runState.textContent = "Complete: safe report generated";
-            startBtn.disabled = false;
+      appendLog(`[API] Fetching real-time market data from backend database...`, "info");
+      
+      let url = "";
+      if (currentMode === "real") {
+        url = `http://127.0.0.1:8123/api/replay?position_id=${realCaseSelect.value}`;
+      } else {
+        url = `http://127.0.0.1:8123/api/custom_replay?direction=${customDir.value}&entry=${customEntry.value}&close=${customClose.value}&lot=${customLot.value}`;
+      }
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error("HTTP error " + res.status);
+          return res.json();
+        })
+        .then(data => {
+          appendLog(`[API] Successfully loaded real database data (Order ID: ${data.id})`, "ok");
+          simDirection = data.direction;
+          simLot = data.lot_size;
+          simEntry = data.open_price;
+          simClose = data.close_price;
+          simActualPnL = data.actual_pnl;
+          simPath = data.path;
+          
+          runSimulationLoop();
+        })
+        .catch(err => {
+          appendLog(`[CORS/OFFLINE] Unable to connect to local API (${err.message}). Falling back to embedded local data.`, "warn");
+          // Offline fallback
+          if (currentMode === "real") {
+            const item = historicalCases[realCaseSelect.value];
+            simDirection = item.direction;
+            simLot = item.lot_size;
+            simEntry = item.open_price;
+            simClose = item.close_price;
+            simActualPnL = item.actual_pnl;
+            simPath = [...item.path];
+          } else {
+            simDirection = customDir.value;
+            simLot = Number(customLot.value) || 1.0;
+            simEntry = Number(customEntry.value) || 5100.0;
+            simClose = Number(customClose.value) || 5080.0;
+            let pnlDir = simDirection === "B" ? 1 : -1;
+            simActualPnL = (simClose - simEntry) * simLot * 100 * pnlDir;
+            simPath = generatePath(simEntry, simClose, 40);
           }
-        }, 500 + index * 520));
-      });
+          runSimulationLoop();
+        });
+    }
+
+    function runSimulationLoop() {
+      runState.textContent = "Replaying market and re-evaluating risk...";
+      appendLog(`[MCP] Replay initialized, Direction: ${simDirection === "B" ? "BUY" : "SELL"}, Lots: ${simLot}, Entry Price: ${simEntry.toFixed(2)}`, "info");
+      appendLog(`[MCP] Mounted wind-control: Hard Stop-Loss ${simSL} Points / Breaker ${simBreaker} Points`, "info");
+      
+      setStep(0);
+      
+      let i = 0;
+      function tick() {
+        if (!simActive) return;
+        simIndex = i;
+        
+        let price = simPath[i];
+        let pnlDir = simDirection === "B" ? 1 : -1;
+        let runningPnL = (price - simEntry) * simLot * 100 * pnlDir;
+
+        // Calculate Adverse Excursion
+        let adverse = simDirection === "B" ? (simEntry - price) : (price - simEntry);
+        adverse = Math.max(0, adverse);
+        if (adverse > simMaxAdverseExcursion) {
+          simMaxAdverseExcursion = adverse;
+        }
+
+        // Check Wind Control Boundaries
+        if (adverse >= simBreaker) {
+          simCurrentState = "RED_BREAKER";
+          simCurrentAction = "emergency_close";
+          chartStatus.textContent = "RED BREAKER (Emergency Liquidation)";
+          chartStatus.className = "badge red";
+          
+          simReplayPnL = -simBreaker * simLot * 100;
+          drawChart(i);
+          
+          appendLog(`[CRITICAL] safety_rules.py: Excursion reached ${adverse.toFixed(2)} points at min ${i}, triggering Red Breaker!`, "red");
+          appendLog(`[EXECUTION] trade_data_server.py: Triggering execute_risk_mitigation(action_type='emergency_close')`, "red");
+          appendLog(`[EXECUTION] Action Success: Position closed out! Exit Price: ${(simDirection === "B" ? simEntry - simBreaker : simEntry + simBreaker).toFixed(2)}, Locked Loss: $${simReplayPnL.toFixed(2)}`, "red");
+          
+          endSimulation(true);
+          return;
+        } 
+        
+        if (adverse >= simSL && simCurrentState === "GREEN_SAFE") {
+          simCurrentState = "YELLOW_WATCH";
+          simCurrentAction = "set_hard_sl";
+          chartStatus.textContent = "YELLOW WATCH (Stop-Loss Set)";
+          chartStatus.className = "badge amber";
+          
+          appendLog(`[WARNING] advisor_agent: Adverse excursion of ${adverse.toFixed(2)} points triggered Yellow Alert!`, "warn");
+          appendLog(`[EXECUTION] trade_data_server.py: Triggered stop-loss set command`, "warn");
+          appendLog(`[EXECUTION] Response: Stop-loss successfully placed at: ${(simDirection === "B" ? simEntry - simSL : simEntry + simSL).toFixed(2)}`, "warn");
+        }
+
+        drawChart(i);
+
+        // Periodic Agent step highlighters
+        if (i === 5) {
+          setStep(1);
+          appendLog(`[ANALYSIS] analysis_agent: Running diagnostics... Floating PnL: $${runningPnL.toFixed(2)}`, "info");
+        } else if (i === 15) {
+          setStep(2);
+          appendLog(`[ADVISOR] advisor_agent: Evaluating decisions. Rating: ${simCurrentState}`, "info");
+        } else if (i === 25) {
+          setStep(3);
+          appendLog(`[MCP] simulate_historical_risk_replay: Streaming K-line tick-by-tick`, "info");
+        } else if (i === 32) {
+          setStep(4);
+          appendLog(`[GUARDRAIL] safety_rules.py: Running Zero-Trust filter to intercept gambling bias`, "info");
+        }
+
+        i++;
+        if (i < simPath.length) {
+          timers.push(setTimeout(tick, 180));
+        } else {
+          // Simulation finished without hitting breaker
+          simReplayPnL = simActualPnL;
+          if (simCurrentState === "YELLOW_WATCH") {
+            let finalAdverse = simDirection === "B" ? (simEntry - simClose) : (simClose - simEntry);
+            if (finalAdverse >= simSL) {
+              simReplayPnL = -simSL * simLot * 100;
+              appendLog(`[EXECUTION] Report: Position hit protective stop-loss before close. Programmatic exit executed. Loss: $${simReplayPnL.toFixed(2)}`, "warn");
+            } else {
+              appendLog(`[INFO] Report: Stop-loss placed but price rebounded. Normal exit executed at target price. Final PnL: $${simReplayPnL.toFixed(2)}`, "ok");
+            }
+          } else {
+            appendLog(`[INFO] Report: Market stable, no alerts triggered. Normal exit PnL: $${simReplayPnL.toFixed(2)}`, "ok");
+          }
+          endSimulation(false);
+        }
+      }
+
+      timers.push(setTimeout(tick, 200));
+    }
+
+    function endSimulation(breakerTriggered) {
+      simActive = false;
+      
+      // Calculate Saved Loss
+      let saved = Math.max(0, simReplayPnL - simActualPnL);
+      
+      // Update Metrics Cards
+      metricReplayPnL.textContent = `$${simReplayPnL.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      metricReplayPnL.style.color = simReplayPnL < 0 ? "var(--red)" : "var(--green)";
+      
+      metricSaved.textContent = `$${saved.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      metricSaved.style.color = saved > 0 ? "var(--green)" : "var(--ink)";
+
+      appendLog(`[AUDIT] critic_agent: Market replay simulation finished. Starting Google Gemini multi-agent pipeline audit...`, "ok");
+      
+      // Render report boxes
+      reportMaxAdverse.textContent = `Maximum Adverse Excursion (MAE): ${simMaxAdverseExcursion.toFixed(2)} Points (Limits: SL=${simSL}pts / Breaker=${simBreaker}pts)`;
+      reportResultStatus.textContent = `Decision Trigger Status: ${simCurrentState} (Final Action: ${simCurrentAction})`;
+      reportDeltaPnL.textContent = `PnL Comparison Improvement: Original PnL $${simActualPnL.toFixed(2)} vs System PnL $${simReplayPnL.toFixed(2)} (Saved: $${saved.toFixed(2)})`;
+      reportActionSummary.textContent = breakerTriggered 
+        ? "Based on real historical market M1 what-if replay, programmatic liquidation breaker played a key role. If you continued holding, the account would suffer catastrophic drawdowns." 
+        : "During this replay cycle, drawdown did not cross the Red Breaker. We suggest you review trends and support levels for this period combined with dynamic ATR.";
+
+      const geminiOutput = document.getElementById("geminiOutput");
+      geminiOutput.textContent = "🚀 Initiating Google Gemini multi-agent workflow via local REST server (calling API, estimated 3-5 seconds)...\n";
+      finalReport.classList.remove("hidden");
+
+      const positionId = currentMode === "real" ? realCaseSelect.value : "custom";
+      fetch(`http://127.0.0.1:8123/api/run_agent?position_id=${positionId}&sl=${simSL}&breaker=${simBreaker}`)
+        .then(res => {
+          if (!res.ok) throw new Error("HTTP Error, Status Code: " + res.status);
+          return res.json();
+        })
+        .then(data => {
+          appendLog(`[API] Successfully received Google Gemini multi-agent workflow output!`, "ok");
+          
+          let stdout = data.stdout || "";
+          
+          // Parse agent outputs out of stdout stream using regex
+          let analysisMatch = stdout.match(/\[analysis_agent\]:([\s\S]*?)(?=\[advisor_agent\]:|$)/);
+          let advisorMatch = stdout.match(/\[advisor_agent\]:([\s\S]*?)(?=\[critic_agent\]:|$)/);
+          let criticMatch = stdout.match(/\[critic_agent\]:([\s\S]*?)$/);
+
+          let analysisText = analysisMatch ? analysisMatch[1].trim() : "No quant metrics extracted.";
+          let advisorText = advisorMatch ? advisorMatch[1].trim() : "No risk advisory suggestions extracted.";
+          let criticText = criticMatch ? criticMatch[1].trim() : "No audit opinion generated.";
+
+          // Format clean text for advisor & critic
+          let cleanAdvisor = advisorText
+            .replace(/^Log setup complete:.*?\n/g, "")
+            .replace(/^To access latest log:.*?\n/g, "")
+            .replace(/^Session ID:.*?\n/g, "")
+            .trim();
+            
+          let cleanCritic = criticText
+            .replace(/^Log setup complete:.*?\n/g, "")
+            .replace(/^To access latest log:.*?\n/g, "")
+            .replace(/^Session ID:.*?\n/g, "")
+            .trim();
+
+          // Phase 1: Highlight Step 2 - Analysis Agent
+          setStep(1);
+          runState.textContent = "Phase 1: Analysis Agent extracting and computing performance metrics...";
+          appendLog(`[AGENT] analysis_agent: Executing historical data alignment, running get_account_stats...`, "info");
+          geminiOutput.textContent = `### 📊 Analysis Agent Quantitative Evaluation Results\n\n${analysisText}`;
+          
+          // Phase 2 after 2s: Highlight Step 3 - Advisor Agent
+          timers.push(setTimeout(() => {
+            setStep(2);
+            runState.textContent = "Phase 2: Advisor Agent querying SKILL.md risk threshold matrix...";
+            appendLog(`[AGENT] advisor_agent: Evaluating metrics using SKILL.md decision boundaries...`, "info");
+            geminiOutput.textContent = `### 📊 Analysis Agent Quantitative Evaluation Results\n\n${analysisText}\n\n---\n\n### 💡 Advisor Agent Diagnosis & Suggestions\n\n${cleanAdvisor}`;
+            
+            // Phase 3 after 2s: Highlight Step 4 - Safety Guardrail Check
+            timers.push(setTimeout(() => {
+              setStep(3);
+              runState.textContent = "Phase 3: Running safety guardrail & de-biasing rule evaluation...";
+              appendLog(`[GUARDRAIL] safety_rules.py: Scanning recommendations for averaging down, loss-holding, and Martingale patterns...`, "warn");
+              
+              let isIntercepted = cleanAdvisor.includes("[Security Guardrail Intercepted");
+              if (isIntercepted) {
+                appendLog(`[GUARDRAIL] safety_rules.py: 🚨 Potential gambler fallacy bias detected! Intercepted successfully and fallback safety template injected.`, "red");
+              } else {
+                appendLog(`[GUARDRAIL] safety_rules.py: ✅ Safety filter passed. No cognitive trading biases detected.`, "ok");
+              }
+              
+              // Phase 4 after 2s: Highlight Step 5 - Critic Agent Audit
+              timers.push(setTimeout(() => {
+                setStep(4);
+                runState.textContent = "Phase 4: Critic Agent auditing risk report and signing final opinion book...";
+                appendLog(`[AUDIT] critic_agent: Executing final QA compliance check and signing audit report...`, "ok");
+                
+                // Final full report output
+                geminiOutput.textContent = cleanCritic;
+                runState.textContent = `Workflow finished. Avoided account loss of $${saved.toFixed(2)}`;
+                setStep(5); // Mark all steps done
+                startBtn.disabled = false;
+              }, 2000));
+              
+            }, 2000));
+            
+          }, 2000));
+        })
+        .catch(err => {
+          appendLog(`[API/ERROR] Failed calling Google Gemini: ${err.message}`, "red");
+          geminiOutput.textContent = `⚠️ Unable to fetch real-time Gemini AI suggestions.\nReason: ${err.message}\n\nPlease ensure local server is running and network is connected.`;
+          runState.textContent = `Replay done (AI error): Saved $${saved.toFixed(2)}`;
+          setStep(5);
+          startBtn.disabled = false;
+        });
     }
 
     startBtn.addEventListener("click", startDemo);
     resetBtn.addEventListener("click", resetDemo);
+    
+    // Fetch cases and stats on page load to fully make the demo page dynamic and back-end driven
+    window.addEventListener("DOMContentLoaded", () => {
+      fetch("http://127.0.0.1:8123/api/cases")
+        .then(res => {
+          if (!res.ok) throw new Error("HTTP error " + res.status);
+          return res.json();
+        })
+        .then(cases => {
+          console.log("[API] Loaded dynamic worst cases list:", cases);
+          // Clear and rebuild options
+          realCaseSelect.innerHTML = "";
+          cases.forEach(item => {
+            const opt = document.createElement("option");
+            opt.value = item.id;
+            opt.textContent = `Case #${item.id} - ${item.direction === "S" ? "Short" : "Long"} ${item.actual_pnl < 0 ? "Loss" : "Profit"} PnL $${item.actual_pnl.toFixed(2)} (Lot: ${item.lot_size}, Entry: ${item.open_price.toFixed(2)})`;
+            realCaseSelect.appendChild(opt);
+            
+            // Overwrite historicalCases cache entry with full path from server
+            historicalCases[item.id] = item;
+          });
+          
+          // Re-bind change hooks and update preview
+          updateMetricsPreview();
+        })
+        .catch(err => {
+          console.warn("[CORS/OFFLINE] Unable to fetch dynamic worst cases list, falling back to embedded local cases.", err);
+        });
+
+      // Fetch database stats for intro display in console
+      fetch("http://127.0.0.1:8123/api/stats")
+        .then(res => res.json())
+        .then(data => {
+          console.log("[API] Live Database Stats:", data);
+        })
+        .catch(err => console.warn("[API] Unable to load database stats."));
+    });
+
+    // Initial Setup
     resetDemo();
   </script>
 </body>

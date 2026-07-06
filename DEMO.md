@@ -41,7 +41,7 @@ Example mitigation response:
 ```json
 {
   "status": "success",
-  "message": "风控指令执行成功：订单 T1001 已成功挂载硬止损，止损价格设置为 2350.0",
+  "message": "Wind control execution successful: Order T1001 stop loss successfully set at 2350.0",
   "ticket_id": "T1001",
   "action": "SET_STOP_LOSS",
   "value": 2350.0
@@ -51,32 +51,32 @@ Example mitigation response:
 ## Expected Final Report Shape
 
 ```markdown
-# 黄金账户量化风控诊断意见书
+# Quantitative Risk Audit Report
 
-## 账户当前风控评级：黄灯 - 警报观察
+## Current Account Risk Rating: YELLOW WATCH
 
-当前账户存在赢小亏大倾向。根据 SKILL.md，处置效应系数 = 平均亏损绝对值 / 平均盈利；当该数值 >= 1.5 时触发风险预警。
+The account exhibits a disposition effect tendency. According to SKILL.md, the Disposition Ratio = (Avg Loss Absolute Value) / (Avg Win Value); a risk alert is triggered when this ratio is >= 1.5.
 
-## 账户核心指标
+## Core Metrics
 
-- 胜率：由 analysis_agent 基于 MCP 返回交易记录计算
-- 平均盈利：由盈利交易均值计算
-- 平均亏损：由亏损交易均值计算
-- 处置效应系数：平均亏损绝对值 / 平均盈利
-- 集中度风险：按 symbol/platform 分布判断
+- Win Rate: Computed by analysis_agent based on MCP trade history.
+- Average Win: Average PnL of profitable trades.
+- Average Loss: Average PnL of losing trades.
+- Disposition Ratio: Absolute average loss divided by average win.
+- Concentration Risk: Determined by symbol/platform distribution.
 
-## 主动风控指令执行记录
+## Active Mitigation Execution Logs
 
-- 已调用 `simulate_historical_risk_replay`
-- 模式：historical replay / what-if simulation
-- 动作分布：`keep_watching` / `set_hard_sl` / `emergency_close`
-- 说明：当前版本不连接真实 broker；它使用历史交易与 M1 行情模拟当时的主动风控决策
+- Called `simulate_historical_risk_replay`
+- Mode: historical replay / what-if simulation
+- Action Distribution: `keep_watching` / `set_hard_sl` / `emergency_close`
+- Note: The current version does not connect to a live broker; it uses historical trades and M1 candles to backtest decisions.
 
-## 行为去偏指导意见
+## De-biasing Recommendations
 
-1. 将止损前置为开仓前规则，而不是浮亏后再决定。
-2. 当处置效应系数超过 1.5 时，暂停扩大风险暴露，优先复盘止损距离和单笔风险。
-3. 禁止使用加仓摊平、扛单等待回本或马丁格尔加倍策略。
+1. Enforce stop-losses pre-entry rather than making decisions under emotional distress.
+2. If the Disposition Ratio exceeds 1.5, pause expanding risk exposure and review stop distances.
+3. Never average down, hold onto losses, or apply Martingale compounding.
 ```
 
 ## Guardrail Demonstration
@@ -84,13 +84,13 @@ Example mitigation response:
 Unsafe model text:
 
 ```text
-你亏损太严重了，应该加仓摊平成本以打回本钱。
+Your losses are heavy, you should average down to recover.
 ```
 
 Sanitized output:
 
 ```text
-[安全护栏已拦截原始建议] 检测到该建议可能包含高风险的仓位管理逻辑（例如加仓摊平、扛单等）。系统不会输出此类建议。建议改为：复盘止损位设置是否合理、降低单笔风险敞口、或咨询持牌财务顾问。
+[Security Guardrail Intercepted Original Suggestion] Detected that this recommendation may contain high-risk position management logic (e.g., averaging down, holding onto losses). The system does not output such recommendations. Recommended alternative: Review whether the stop-loss placement is reasonable, reduce single-trade risk exposure, or consult a licensed advisor.
 ```
 
 ## Local Verification

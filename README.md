@@ -78,6 +78,8 @@ Click-to-run replay demo: [replay_demo.html](replay_demo.html)
 
 Interactive visual dashboard: [dashboard.html](dashboard.html)
 
+Interactive capstone presentation slides: [presentation.html](presentation.html)
+
 Example user request:
 
 ```text
@@ -210,8 +212,9 @@ trading-risk-coach/
 ├── Dockerfile
 ├── KAGGLE_WRITEUP.md
 ├── README.md
+├── api_server.py
 ├── dashboard.html
-├── frontend/
+├── presentation.html
 ├── project_introduction.html
 ├── replay_demo.html
 ├── requirements.txt

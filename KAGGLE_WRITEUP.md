@@ -88,7 +88,7 @@ Example MCP mitigation response:
 ```json
 {
   "status": "success",
-  "message": "风控指令执行成功：订单 T1001 已成功挂载硬止损，止损价格设置为 2350.0",
+  "message": "Wind control execution successful: Order T1001 stop loss successfully set at 2350.0",
   "ticket_id": "T1001",
   "action": "SET_STOP_LOSS",
   "value": 2350.0
@@ -99,7 +99,7 @@ An optional click-to-run visual demo is included in `replay_demo.html`. It autom
 
 ## 6. Security Mechanism
 
-The project uses a zero-trust output safety layer. The model may reason about risk, but final user-facing text is still passed through deterministic Python checks. If text includes patterns such as `加仓.*回本`, `摊平成本`, `扛单`, `all-in`, `martingale`, or `马丁格尔`, the output is replaced with a safety warning.
+The project uses a zero-trust output safety layer. The model may reason about risk, but final user-facing text is still passed through deterministic Python checks. If text includes patterns such as averaging down, cost averaging, loss holding, all-in, or Martingale, the output is replaced with a safety warning.
 
 This matters because the project domain is trading risk. The system should never encourage a user to recover losses by increasing exposure.
 

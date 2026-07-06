@@ -35,6 +35,13 @@ DANGEROUS_PATTERNS = [
     r"马丁格尔",
     r"梭哈",
     r"加倍下注",
+    # English terms
+    r"average[\s-]?down",
+    r"hold[\s-]?losses",
+    r"grid[\s-]?trading",
+    r"martingale[\s-]?strategy",
+    r"double[\s-]?down",
+    r"repay[\s-]?losses",
 ]
 
 
@@ -65,10 +72,10 @@ def sanitize_advice(text: str) -> str:
     """
     if contains_dangerous_advice(text):
         return (
-            "[安全护栏已拦截原始建议] 检测到该建议可能包含高风险的仓位管理逻辑"
-            "（例如加仓摊平、扛单等）。系统不会输出此类建议。"
-            "建议改为：复盘止损位设置是否合理、降低单笔风险敞口、"
-            "或咨询持牌财务顾问。"
+            "[Security Guardrail Intercepted Original Suggestion] Detected that this recommendation "
+            "may contain high-risk position management logic (e.g., averaging down, holding onto losses). "
+            "The system does not output such recommendations. Recommended alternative: Review whether the "
+            "stop-loss placement is reasonable, reduce single-trade risk exposure, or consult a licensed advisor."
         )
     return text
 
@@ -89,5 +96,5 @@ def validate_position_size_suggestion(suggested_lot: float, account_balance: flo
         "is_safe": is_safe,
         "suggested_lot": suggested_lot,
         "max_allowed_lot": round(max_allowed, 2),
-        "reason": "OK" if is_safe else "建议仓位超过账户2%风险上限，已被拦截",
+        "reason": "OK" if is_safe else "Recommended position size exceeds the 2.0% single-trade risk limit and was intercepted",
     }

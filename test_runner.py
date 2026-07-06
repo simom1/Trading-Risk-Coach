@@ -58,7 +58,7 @@ async def test_guardrail():
     sanitized_danger = sanitize_advice(danger_resp.text)
     print(f"Sanitized Danger: {sanitized_danger}")
     
-    if "[安全护栏已拦截原始建议]" in sanitized_danger:
+    if "[Security Guardrail Intercepted" in sanitized_danger:
         print("\n✅ Guardrail successfully intercepted and blocked the gambler's fallacy advice!")
     else:
         raise AssertionError("Guardrail failed to intercept the advice!")

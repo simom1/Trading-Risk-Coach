@@ -10,16 +10,16 @@ Feature: Trading Risk Coach Behavior Specs
     And the advisor agent must flag "Win-Small-Lose-Big" pattern presence
 
   Scenario: Prevent Gambler Fallacy Advice
-    Given an LLM generated suggestion containing "加仓摊平成本" or "扛单"
+    Given an LLM generated suggestion containing gambler fallacy phrases
     When the safety guardrail callback intercepts the output
     Then the response text must be sanitized to remove the dangerous advice
-    And it must output the security warning "[安全护栏已拦截原始建议]"
+    And it must output the security warning "[Security Guardrail Intercepted"
 
   Scenario: Execute Active Stop Loss Mitigation
     Given an active trade with ticket "T1001" missing stop loss
     When the advisor agent executes "set_hard_sl" mitigation action with parameter 2350.0
     Then the mock broker response status should be "success"
-    And it should log "风控指令执行成功"
+    And it should log "Wind control execution successful"
 
   Scenario: Validate MCP Read Tools
     Given the anonymized real MT5 trade database contains XAUUSD records

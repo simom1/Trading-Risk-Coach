@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Risk Coach — Capstone Presentation Slides</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --ink: #f3f4f6;
+      --text-muted: #9ca3af;
+      --blue: #3b82f6;
+      --blue-glow: rgba(59, 130, 246, 0.15);
+      --green: #10b981;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      overflow: hidden; /* Lock viewport for slides */
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Ambient Glowing Orbs */
+    body::before, body::after {
+      content: "";
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      filter: blur(150px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    body::before {
+      top: 10%;
+      left: 10%;
+      background: rgba(99, 102, 241, 0.15);
+    }
+    body::after {
+      bottom: 10%;
+      right: 10%;
+      background: rgba(59, 130, 246, 0.15);
+    }
+
+    /* Navigation Bar */
+    .top-nav {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 2.5rem;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(9, 13, 22, 0.8);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand span {
+      background: linear-gradient(135deg, #60a5fa, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-link.active {
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.1);
+      font-weight: 600;
+    }
+
+    /* Slides Wrapper */
+    .deck-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 2rem;
+      z-index: 5;
+    }
+
+    /* Slide Base Style */
+    .slide {
+      position: absolute;
+      width: 1000px;
+      height: 600px;
+      max-width: 90%;
+      max-height: 80vh;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      padding: 3rem;
+      opacity: 0;
+      transform: scale(0.96) translateY(20px);
+      pointer-events: none;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    /* Typography inside slides */
+    .slide-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .slide-tag {
+      font-family: var(--font-title);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--blue);
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .slide-title {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.8px;
+      line-height: 1.2;
+      background: linear-gradient(to right, #f3f4f6, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-content {
+      flex: 1;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #d1d5db;
+    }
+
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Components used in slides */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2rem;
+      height: 100%;
+      align-items: center;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .feature-icon {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--blue);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .feature-text h4 {
+      font-family: var(--font-title);
+      font-size: 1.15rem;
+      color: white;
+      margin-bottom: 0.2rem;
+    }
+
+    .feature-text p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Slide Controls */
+    .controls {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 1000px;
+      max-width: 90%;
+      margin: 0 auto 2.5rem;
+      padding: 0 1rem;
+    }
+
+    .btn-control {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-control:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--blue);
+    }
+
+    .btn-control:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .indicators {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .indicator-dot.active {
+      background: var(--blue);
+      transform: scale(1.3);
+      box-shadow: 0 0 10px var(--blue);
+    }
+
+    /* Presentation visual widgets */
+    .tech-badges {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    .badge.highlight {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+
+    /* Workflow Diagram inside Slides */
+    .flow-diagram {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .flow-node {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1rem;
+      width: 190px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .flow-node:hover {
+      border-color: var(--blue);
+      background: rgba(59, 130, 246, 0.03);
+    }
+
+    .flow-node.active-node {
+      border-color: var(--blue);
+      background: var(--blue-glow);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+    }
+
+    .flow-node h5 {
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .flow-node p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .flow-arrow {
+      color: var(--text-muted);
+      font-weight: bold;
+      font-size: 1.25rem;
+    }
+
+    /* Code View Grid */
+    .code-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .code-box {
+      background: #05070c;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      color: #9cdcfe;
+    }
+
+    .code-box-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .highlight-red { color: #f44747; }
+    .highlight-green { color: #4ec9b0; }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <div class="brand">🛡️ <span>Trading Risk Coach</span></div>
+    <div class="nav-links">
+      <a href="project_introduction.html" class="nav-link">Technical Docs</a>
+      <a href="replay_demo.html" class="nav-link">Replay Sandtable</a>
+      <a href="dashboard.html" class="nav-link">KPI Dashboard</a>
+      <a href="presentation.html" class="nav-link active">Video Slides</a>
+    </div>
+  </nav>
+
+  <!-- SLIDES DECK CONTAINER -->
+  <main class="deck-container">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide active" id="slide-0">
+      <div class="slide-header">
+        <span class="slide-tag">Capstone Presentation</span>
+        <h2 class="slide-title">Trading Risk Coach</h2>
+      </div>
+      <div class="slide-content" style="display: flex; flex-direction: column; justify-content: center; gap: 1rem;">
+        <h3 style="font-family: var(--font-title); font-size: 1.6rem; color: white;">
+          Multi-Agent Risk Diagnostics & Behavioral De-biasing Copilot
+        </h3>
+        <p style="color: var(--text-muted); max-width: 700px;">
+          An AI-first trading behavior review and active risk mitigation system built with the Google Agent Development Kit (ADK) and Model Context Protocol (MCP).
+        </p>
+        <div class="tech-badges">
+          <span class="badge highlight">Google ADK</span>
+          <span class="badge highlight">FastMCP Server</span>
+          <span class="badge">Gemini 3.1 Flash-Lite</span>
+          <span class="badge">Spec-Driven Development</span>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Track: Agents for Business</span>
+        <span>Slide 1 of 6</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: PROBLEMS SOLVED -->
+    <section class="slide" id="slide-1">
+      <div class="slide-header">
+        <span class="slide-tag">Target Domain</span>
+        <h2 class="slide-title">Three Fatal Retail Trading Pitfalls</h2>
+      </div>
+      <div class="slide-content">
+        <ul class="feature-list" style="margin-top: 1rem;">
+          <li class="feature-item">
+            <div class="feature-icon icon-red">1</div>
+            <div class="feature-text">
+              <h4>The Disposition Effect</h4>
+              <p>Traders cut profits quickly ("win small") to avoid loss anxiety, but hold losing positions for hours or days ("dead hold"), resulting in negative expected returns.</p>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feature-icon icon-red">2</div>
+            <div class="feature-text">
+              <h4>Missing Stop-Loss Protection</h4>
+              <p>Entering positions without protective boundaries. A single sharp market spike can destroy months of accumulated account profits.</p>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feature-icon icon-red">3</div>
+            <div class="feature-text">
+              <h4>Gambler's Fallacy & AI Hallucinations</h4>
+              <p>Under distress, traders average down or multiply lot sizes (Martingale logic). Unconstrained LLMs frequently hallucinate and support these emotional, toxic moves.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="slide-footer">
+        <span>Solving Psychological Pitfalls</span>
+        <span>Slide 2 of 6</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: MULTI-AGENT ARCHITECTURE -->
+    <section class="slide" id="slide-2">
+      <div class="slide-header">
+        <span class="slide-tag">Agentic Pipeline</span>
+        <h2 class="slide-title">Google ADK Workflow Design</h2>
+      </div>
+      <div class="slide-content">
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+          A sequential workflow where specialized agents query MCP tools, evaluate risk thresholds, and format safe outputs:
+        </p>
+        
+        <div class="flow-diagram">
+          <div class="flow-node active-node">
+            <h5>Analysis Agent</h5>
+            <p>Calculates win rate, average win/loss, and Disposition Ratio</p>
+          </div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-node">
+            <h5>Advisor Agent</h5>
+            <p>Injects SKILL.md and triggers active mitigation tools</p>
+          </div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-node">
+            <h5>Guardrail Filter</h5>
+            <p>Python callback intercepts averaging down advice</p>
+          </div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-node">
+            <h5>Critic Agent</h5>
+            <p>Audits metrics and signs Three-Value report</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; font-size: 0.9rem; padding: 10px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+          <strong>Key Innovation:</strong> Decoupling the pipeline allows the <code>Analysis Agent</code> to focus strictly on numerical calculations while the <code>Critic Agent</code> acts as an independent compliance reviewer.
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Architecture & Flow</span>
+        <span>Slide 3 of 6</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: MCP TOOL INTEGRATION -->
+    <section class="slide" id="slide-3">
+      <div class="slide-header">
+        <span class="slide-tag">Dual-Directional Tools</span>
+        <h2 class="slide-title">FastMCP Server Capabilities</h2>
+      </div>
+      <div class="slide-content">
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          The agents communicate with the broker data layer using standard Model Context Protocol (stdio):
+        </p>
+
+        <div class="code-grid">
+          <div>
+            <div class="code-box-title">1. Read Tools (Trade Records & Market Candles)</div>
+            <div class="code-box">
+• <strong>get_account_stats(days)</strong>: Computes ratios from real_trades.csv.
+• <strong>get_market_context()</strong>: Queries real XAUUSD M1 price candles around timestamps.
+• <strong>simulate_historical_risk_replay()</strong>: Simulates historical risk paths.
+            </div>
+          </div>
+          <div>
+            <div class="code-box-title">2. Write Tools (Active Execution on Mock Broker)</div>
+            <div class="code-box">
+• <strong>execute_risk_mitigation(action, ticket_id, param)</strong>:
+  - <strong>set_hard_sl</strong>: Place protective SL.
+  - <strong>emergency_close</strong>: Immediate market exit.
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; text-align: center;">
+          All database exports (`real_trades.csv` with 3,225 records) and market K-lines (`XAUUSD_M1.csv` with 173K rows) represent real trading history.
+        </p>
+      </div>
+      <div class="slide-footer">
+        <span>FastMCP Integration</span>
+        <span>Slide 4 of 6</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: SAFETY GUARDRAILS -->
+    <section class="slide" id="slide-4">
+      <div class="slide-header">
+        <span class="slide-tag">Zero-Trust Output Layer</span>
+        <h2 class="slide-title">Preventing AI Hallucinations</h2>
+      </div>
+      <div class="slide-content">
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.8rem;">
+          Even if an LLM is induced to provide dangerous trading recovery advice, a deterministic Python interceptor callback filters the text in &lt;1ms before delivery:
+        </p>
+
+        <div class="code-grid">
+          <div>
+            <div class="code-box-title" style="color: var(--red);">Raw LLM Response (Danger)</div>
+            <div class="code-box" style="border-color: rgba(239, 68, 68, 0.2);">
+"You are currently in a draw-down. <span class="highlight-red">We suggest you average down your cost</span> by adding buy positions as the price falls. This will lower your entry average price..."
+            </div>
+          </div>
+          <div>
+            <div class="code-box-title" style="color: var(--green);">Sanitized Output (Safe)</div>
+            <div class="code-box" style="border-color: rgba(16, 185, 129, 0.2);">
+"<span class="highlight-green">[Security Guardrail Intercepted Original Suggestion]</span> Detected high-risk position management logic. Falling back to safe template. Rules: 1. Keep risk exposure under 2.0%."
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;">
+          This ensures 100% compliance with risk management guidelines defined in <code>SKILL.md</code>.
+        </p>
+      </div>
+      <div class="slide-footer">
+        <span>Deterministic Protection</span>
+        <span>Slide 5 of 6</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: TEST VERIFICATION -->
+    <section class="slide" id="slide-5">
+      <div class="slide-header">
+        <span class="slide-tag">Reproducibility</span>
+        <h2 class="slide-title">Verification Evidence</h2>
+      </div>
+      <div class="slide-content">
+        <ul class="feature-list" style="margin-top: 1rem;">
+          <li class="feature-item">
+            <div class="feature-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--green); border-color: rgba(16, 185, 129, 0.2);">✓</div>
+            <div class="feature-text">
+              <h4>Behavioral Specification Tests (test_sdd_specs.py)</h4>
+              <p>Validates SKILL.md threshold matching, guardrail callback filters, MCP JSON schemas, and mock broker executions successfully.</p>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feature-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--green); border-color: rgba(16, 185, 129, 0.2);">✓</div>
+            <div class="feature-text">
+              <h4>ADK Workflow Smoke Tests (test_runner.py)</h4>
+              <p>Verifies sequential edge transition correctness and loads agent parameters under model <code>gemini-3.1-flash-lite</code>.</p>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feature-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--green); border-color: rgba(16, 185, 129, 0.2);">✓</div>
+            <div class="feature-text">
+              <h4>Deployable & Containerized</h4>
+              <p>Ready for Cloud Run containerization using slim <code>Dockerfile</code> and pinned dependencies in <code>requirements.txt</code>.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="slide-footer">
+        <span>100% Tests Passing</span>
+        <span>Slide 6 of 6</span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CONTROLS -->
+  <footer class="controls">
+    <button class="btn-control" id="prevBtn" disabled>◀ Prev</button>
+    <div class="indicators" id="indicators">
+      <!-- Dots injected dynamically -->
+    </div>
+    <button class="btn-control" id="nextBtn">Next ▶</button>
+  </footer>
+
+  <script>
+    const slides = document.querySelectorAll(".slide");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const indicators = document.getElementById("indicators");
+    
+    let currentSlide = 0;
+
+    // Create indicator dots dynamically
+    slides.forEach((_, index) => {
+      const dot = document.createElement("div");
+      dot.className = `indicator-dot ${index === 0 ? "active" : ""}`;
+      dot.addEventListener("click", () => goToSlide(index));
+      indicators.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll(".indicator-dot");
+
+    function updateControls() {
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === slides.length - 1;
+      
+      slides.forEach((slide, index) => {
+        if (index === currentSlide) {
+          slide.classList.add("active");
+        } else {
+          slide.classList.remove("active");
+        }
+      });
+
+      dots.forEach((dot, index) => {
+        if (index === currentSlide) {
+          dot.classList.add("active");
+        } else {
+          dot.classList.remove("active");
+        }
+      });
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < slides.length) {
+        currentSlide = index;
+        updateControls();
+      }
+    }
+
+    prevBtn.addEventListener("click", () => {
+      if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      if (currentSlide < slides.length - 1) {
+        goToSlide(currentSlide + 1);
+      }
+    });
+
+    // Keyboard Navigation
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === "Space" || e.key === " ") {
+        e.preventDefault();
+        if (currentSlide < slides.length - 1) {
+          goToSlide(currentSlide + 1);
+        }
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (currentSlide > 0) {
+          goToSlide(currentSlide - 1);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

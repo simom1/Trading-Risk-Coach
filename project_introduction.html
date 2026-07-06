@@ -348,6 +348,31 @@
             border-radius: 4px;
             font-size: 0.85em;
         }
+        /* Navigation styling */
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .nav-link.active {
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+            font-weight: 600;
     </style>
 </head>
 <body>
@@ -357,46 +382,51 @@
     <header>
         <div class="logo-badge">Kaggle Capstone Project</div>
         <h1>Trading Risk Coach</h1>
-        <p class="subtitle">一款专为个人交易者研发的多智能体风控诊断与行为去偏副驾驶系统，不提供投资建议，只做交易行为复盘与风险控制辅助。</p>
+        <p class="subtitle">A multi-agent risk diagnostics and behavioral de-biasing copilot built for retail traders. It does not provide investment advice, only trading review and risk control assistance.</p>
+        <div class="nav-bar">
+            <a href="project_introduction.html" class="nav-link active">Technical Docs</a>
+            <a href="replay_demo.html" class="nav-link">Replay Sandtable</a>
+            <a href="dashboard.html" class="nav-link">KPI Dashboard</a>
+        </div>
     </header>
 
     <!-- Section 1: Problems Solved -->
     <section>
-        <h2 class="section-title"><span>#</span> 解决的核心痛点 (What Problems it Solves)</h2>
+        <h2 class="section-title"><span>#</span> What Problems it Solves</h2>
         <div class="pain-grid">
             <div class="card">
                 <div class="card-icon icon-red">📈</div>
-                <h3 class="card-title">处置效应 (Disposition Effect)</h3>
-                <p class="card-desc">散户交易者在面对盈利时倾向于急切“落袋为安”（赚小钱就跑），而在面对亏损时却长期死扛（扛单）甚至逆势加仓，导致总期望收益为负。</p>
+                <h3 class="card-title">Disposition Effect</h3>
+                <p class="card-desc">Retail traders tend to take profits quickly ("win small") to avoid giving back gains, but hold onto losing positions ("扛单") or average down against the trend, resulting in negative expected returns.</p>
             </div>
             <div class="card">
                 <div class="card-icon icon-gold">🛡️</div>
-                <h3 class="card-title">量化风险意识缺失</h3>
-                <p class="card-desc">普通投资者缺乏对下行风险敞口的科学量化手段，无法计算单笔最大风险暴露（VaR/CVaR）以及评估平台和资产集中度风险。</p>
+                <h3 class="card-title">Lack of Quantitative Risk Awareness</h3>
+                <p class="card-desc">Average investors lack scientific tools to quantify downside exposure, calculate VaR limits, or evaluate symbol and platform concentration risks.</p>
             </div>
             <div class="card">
                 <div class="card-icon icon-blue">🚦</div>
-                <h3 class="card-title">情感决策与AI幻觉</h3>
-                <p class="card-desc">交易者在连续亏损时易陷入“赌徒谬误”进行非理性补仓。同时，通用AI大模型给出的风控建议也易产生幻觉，误导用户做出高风险操作。</p>
+                <h3 class="card-title">Emotional Decisions & AI Hallucinations</h3>
+                <p class="card-desc">Traders often fall into the "Gambler's Fallacy" and add to losing trades. Furthermore, general LLMs often hallucinate and recommend high-risk averaging-down behaviors.</p>
             </div>
         </div>
     </section>
 
     <!-- Section 2: What it Does & Workflow -->
     <section>
-        <h2 class="section-title"><span>#</span> 系统工作流程 (Agentic Pipeline)</h2>
+        <h2 class="section-title"><span>#</span> System Workflow (Agentic Pipeline)</h2>
         <div class="flow-container">
-            <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">点击下方每一个运行步骤，查看具体的底层执行逻辑与对应的代码文件：</p>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">Click each execution step below to view the underlying logic and corresponding code files:</p>
             <div class="flow-steps">
                 
                 <div class="flow-step active" onclick="toggleStep(this)">
                     <div class="step-number">1</div>
                     <div class="step-info">
-                        <div class="step-title">数据加载与指标计算 <span class="step-tag">Analysis Agent</span></div>
-                        <p class="step-desc">系统启动后，调用 MCP 数据服务，拉取交易流水并科学计算核心量化指标。</p>
+                        <div class="step-title">Data Loading & Metric Calculation <span class="step-tag">Analysis Agent</span></div>
+                        <p class="step-desc">Once started, the system calls MCP data tools to retrieve trade logs and compute core quantitative performance metrics.</p>
                         <div class="step-detail">
-                            对应文件：<code>trading_risk_coach/agents/analysis_agent.py</code><br>
-                            逻辑：通过 Stdio 连接标准 MCP 数据包，执行 Python 进行胜率、盈亏比（平均盈利 vs 平均亏损绝对值）、单笔亏损极值的数学计算，完成<b>Observe（观察）</b>阶段。
+                            File: <code>trading_risk_coach/agents/analysis_agent.py</code><br>
+                            Logic: Connects via Stdio to stdio MCP tools, executes Python pandas to calculate win rate, reward-to-risk ratio, and maximum drawdown metrics, completing the <b>Observe</b> stage.
                         </div>
                     </div>
                 </div>
@@ -404,11 +434,11 @@
                 <div class="flow-step" onclick="toggleStep(this)">
                     <div class="step-number">2</div>
                     <div class="step-info">
-                        <div class="step-title">规则注入与风险诊断 <span class="step-tag">Advisor Agent</span></div>
-                        <p class="step-desc">对比行为金融学 Skill 规范，判定是否存在偏差，并针对高危活跃持仓触发风控干预。</p>
+                        <div class="step-title">Rule Injection & Risk Diagnosis <span class="step-tag">Advisor Agent</span></div>
+                        <p class="step-desc">Compare metrics against behavioral finance Skill definitions to diagnose biases, and trigger risk intervention on high-risk active positions.</p>
                         <div class="step-detail">
-                            对应文件：<code>trading_risk_coach/agents/advisor_agent.py</code><br>
-                            逻辑：读取 <code>SKILL.md</code> 规范，若判定“处置效应系数 = 平均亏损绝对值 / 平均盈利 >= 1.5”则触发赢小亏大警报。若发现活跃持仓中存在未挂止损高危单，将直接调用风控工具（设置硬止损/紧急平仓），完成<b>Think & Act（思考与行动）</b>阶段。
+                            File: <code>trading_risk_coach/agents/advisor_agent.py</code><br>
+                            Logic: Reads <code>SKILL.md</code> rules; if the Disposition Effect Ratio (avg_loss / avg_win) is >= 1.5, it triggers a win-small-lose-big alert. If active positions lack stop losses, it executes risk mitigation tools (Stop-loss set / Emergency close), completing the <b>Think & Act</b> stage.
                         </div>
                     </div>
                 </div>
@@ -416,23 +446,20 @@
                 <div class="flow-step" onclick="toggleStep(this)">
                     <div class="step-number">3</div>
                     <div class="step-info">
-                        <div class="step-title">零信任硬拦截安全过滤 <span class="step-tag">Guardrail Callback</span></div>
-                        <p class="step-desc">在风控决策输出给用户之前，由确定性 Python 熔断护栏过滤拦截潜在的危险投资建议。</p>
+                        <div class="step-title">Zero-Trust Hard Guardrail Interception <span class="step-tag">Guardrail Callback</span></div>
+                        <p class="step-desc">Deterministic Python guardrail interceptor filters out high-risk trading advice before delivering reports to clients.</p>
                         <div class="step-detail">
-                            对应文件：<code>trading_risk_coach/guardrails/safety_rules.py</code><br>
-                            逻辑：大模型生成的文本经过注册的 <code>after_model_callback</code> 拦截。如果文本中包含任何“加仓回本”、“摊平成本”等赌徒谬误词汇，系统会强行抹除并替换为标准的红色安全警报文本，实现<b>物理级别零信任拦截</b>。
+                            File: <code>trading_risk_coach/guardrails/safety_rules.py</code><br>
+                            Logic: Text is passed through a registered <code>after_model_callback</code>. If the text contains gambling patterns ("averaging down", "holding losses"), it is intercepted and replaced with a fallback warning, ensuring <b>zero-trust physical protection</b>.
                         </div>
-                    </div>
-                </div>
-
-                <div class="flow-step" onclick="toggleStep(this)">
+                                  <div class="flow-step" onclick="toggleStep(this)">
                     <div class="step-number">4</div>
                     <div class="step-info">
-                        <div class="step-title">审计排版与风控意见书呈献 <span class="step-tag">Critic Agent</span></div>
-                        <p class="step-desc">审计生成的报告以确保指标准确度，进行三态风控评级分类，并生成工整的报告。</p>
+                        <div class="step-title">Formatting & Audit Opinion Signing <span class="step-tag">Critic Agent</span></div>
+                        <p class="step-desc">Review generated advice, ensure exact quantitative figures are cited, classify the account risk under Three-Value logic, and sign the official Quantitative Risk Audit Report.</p>
                         <div class="step-detail">
-                            对应文件：<code>trading_risk_coach/agents/critic_agent.py</code><br>
-                            逻辑：对前序报告执行 QA 审查，确切核对每一项数字指标是否具备数据依据，并根据安全状态将其分类为：🟢 【绿灯 - 安全】、🟡 【黄灯 - 警报观察】、🔴 【红灯 - 熔断执行】，产出终审报告。
+                            File: <code>trading_risk_coach/agents/critic_agent.py</code><br>
+                            Logic: Conducts a QA review to verify data points against source facts. It categorizes the risk status as 🟢 [GREEN - SAFE], 🟡 [YELLOW - WATCH], or 🔴 [RED - BREAKER], and formats the final quantitative opinion.
                         </div>
                     </div>
                 </div>
@@ -443,44 +470,44 @@
 
     <!-- Section 3: Rubric Compliance -->
     <section>
-        <h2 class="section-title"><span>#</span> Kaggle Rubric 概念对齐 (Kaggle Evaluation Mapping)</h2>
+        <h2 class="section-title"><span>#</span> Kaggle Rubric Concept Alignment</h2>
         <table class="rubric-table">
             <thead>
                 <tr>
-                    <th>评测核心要素</th>
-                    <th>项目具体技术实现</th>
-                    <th>源码映射位置</th>
-                    <th>状态</th>
+                    <th>Evaluation Core Element</th>
+                    <th>Technical Implementation Details</th>
+                    <th>Source Code Mapping</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td><b>ADK Agent & Multi-Agent</b></td>
-                    <td>定义了 Analysis -> Advisor -> Critic 三个智能体，并使用 Google ADK 工作流进行串联。</td>
+                    <td>Defines Analysis -> Advisor -> Critic agents connected via Google ADK workflows.</td>
                     <td><code>trading_risk_coach/agent.py</code></td>
                     <td><span class="badge-verified">Verified</span></td>
                 </tr>
                 <tr>
                     <td><b>MCP Server (stdio)</b></td>
-                    <td>运行独立的 FastMCP 服务端，向 AI 暴露读取流水和写入风控修改的双向工具集。</td>
+                    <td>Runs a FastMCP server to expose dual-directional tools for reading trade history and modifying risk structures.</td>
                     <td><code>trading_risk_coach/mcp_server/trade_data_server.py</code></td>
                     <td><span class="badge-verified">Verified</span></td>
                 </tr>
                 <tr>
                     <td><b>Agent Skills</b></td>
-                    <td>将处置效应公式（平均亏损 / 平均盈利）和三态风控判定标准制作为独立的 Skill，动态解耦注入。</td>
+                    <td>Exposes the Disposition Effect formula (avg_loss / avg_win) and Three-Value risk limits as modular skills.</td>
                     <td><code>trading_risk_coach/skills/risk_pattern_detection/SKILL.md</code></td>
                     <td><span class="badge-verified">Verified</span></td>
                 </tr>
                 <tr>
                     <td><b>Security Features</b></td>
-                    <td>通过 <code>after_model_callback</code> 拦截响应，利用确定性 Python 正则安全机制切断扛单和补仓建议。</td>
+                    <td>Uses after_model_callback hook to filter responses via deterministic Python patterns, blocking high-risk gambler advice.</td>
                     <td><code>trading_risk_coach/guardrails/safety_rules.py</code></td>
                     <td><span class="badge-verified">Verified</span></td>
                 </tr>
                 <tr>
                     <td><b>Deployability</b></td>
-                    <td>提供了轻量化的 slim-Dockerfile 与固定版本依赖，支持打包部署至 Cloud Run 风格的容器环境。</td>
+                    <td>Provides a slim Dockerfile and pinned requirements.txt, ready for Cloud Run containerization.</td>
                     <td><code>Dockerfile</code> & <code>requirements.txt</code></td>
                     <td><span class="badge-verified">Verified</span></td>
                 </tr>
@@ -490,36 +517,36 @@
 
     <!-- Section 4: Verification Evidence -->
     <section>
-        <h2 class="section-title"><span>#</span> 测试证据与可复现性 (Verification Evidence)</h2>
+        <h2 class="section-title"><span>#</span> Verification Evidence & Reproducibility</h2>
         <div class="pain-grid">
             <div class="card">
                 <div class="card-icon icon-blue">✓</div>
-                <h3 class="card-title">行为规格测试</h3>
-                <p class="card-desc"><code>python test_sdd_specs.py</code> 已验证 Skill 阈值读取、危险建议拦截、MCP 读写工具 JSON 输出、止损设置成功，以及非法风控动作安全失败。</p>
+                <h3 class="card-title">Behavioral Specification Tests</h3>
+                <p class="card-desc"><code>python test_sdd_specs.py</code> validates skill parsing, guardrail filtering, MCP IO outputs, stop-loss operations, and security bounds.</p>
             </div>
             <div class="card">
                 <div class="card-icon icon-gold">↔</div>
-                <h3 class="card-title">ADK 工作流冒烟测试</h3>
-                <p class="card-desc"><code>python test_runner.py</code> 已确认 <code>START -> analysis_agent -> advisor_agent -> critic_agent</code> 工作流可导入，且三个 Agent 使用稳定模型 <code>gemini-3.1-flash-lite</code>。</p>
+                <h3 class="card-title">ADK Workflow Integration Tests</h3>
+                <p class="card-desc"><code>python test_runner.py</code> runs integration tests for <code>START -> analysis_agent -> advisor_agent -> critic_agent -> END</code> via <code>gemini-3.1-flash-lite</code>.</p>
             </div>
             <div class="card">
                 <div class="card-icon icon-red">!</div>
-                <h3 class="card-title">安全边界</h3>
-                <p class="card-desc">项目定位为交易行为风控与复盘辅助系统，不预测市场、不推荐开仓、不构成投资建议。对“加仓回本、扛单、马丁格尔”等恢复性高危建议进行确定性替换。</p>
+                <h3 class="card-title">Safety & Operational Limits</h3>
+                <p class="card-desc">Provides risk monitoring assistance; does not predict markets, suggest entry directions, or serve as financial advice. Safe fallbacks are injected for gambler patterns.</p>
             </div>
         </div>
     </section>
 
     <!-- Section 5: Demo and Limitations -->
     <section>
-        <h2 class="section-title"><span>#</span> Demo 场景与未来改进 (Demo & Roadmap)</h2>
+        <h2 class="section-title"><span>#</span> Demo Scenarios & Roadmap</h2>
         <div class="flow-container">
-            <p style="color: var(--text-secondary); margin-bottom: 1rem;">示例输入：</p>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Sample Query:</p>
             <p><code>Please review my recent XAUUSD trades and tell me whether I am showing win-small-lose-big behavior.</code></p>
-            <p style="color: var(--text-secondary); margin: 1.5rem 0 1rem;">系统预期执行链路：</p>
-            <p class="card-desc">MCP 读取交易流水和 M1 行情 -> Analysis Agent 计算胜率/平均盈亏/处置效应系数 -> Advisor Agent 对照 <code>SKILL.md</code> 触发风控规则 -> 调用 <code>simulate_historical_risk_replay</code> 回放历史持仓路径，模拟硬止损/熔断动作 -> Guardrail 拦截危险恢复建议 -> Critic Agent 输出三态风控报告。</p>
-            <p style="color: var(--text-secondary); margin: 1.5rem 0 1rem;">局限性与未来方向：</p>
-            <p class="card-desc">当前经纪商执行层为模拟工具，数据层使用匿名化 MT5 交易导出和 XAUUSD M1 行情 CSV。后续可替换为真实券商/交易所 API、数据库型 MCP Server、组合级敞口汇总、更多回撤指标，以及面向风控人员的操作仪表盘。</p>
+            <p style="color: var(--text-secondary); margin: 1.5rem 0 1rem;">Expected Agent Execution Flow:</p>
+            <p class="card-desc">MCP queries trade records and M1 candles -> Analysis Agent computes win rate / reward-risk / Disposition Ratio -> Advisor Agent queries <code>SKILL.md</code> -> Advisor triggers <code>simulate_historical_risk_replay</code> -> Guardrail sanitizes text -> Critic Agent signs final risk audit report.</p>
+            <p style="color: var(--text-secondary); margin: 1.5rem 0 1rem;">Limitations & Future Roadmap:</p>
+            <p class="card-desc">Broker layers are simulated, relying on anonymized MT5 logs and XAUUSD M1 CSVs. Future iterations will integrate real-time broker APIs, database MCP servers, multi-symbol portfolio risk aggregates, and enterprise compliance dashboards.</p>
         </div>
     </section>
 

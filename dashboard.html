@@ -336,14 +336,45 @@
       .side-panel.left-side { border-right: none; border-bottom: 1px solid var(--border); }
       .impl-steps { grid-template-columns: 1fr; }
     }
+    /* Navigation styling */
+    .nav-bar {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    .nav-link:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-link.active {
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.1);
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <div class="header">
-  <h1>Trading Risk Coach — 核心成效对比展示</h1>
-  <p>真实还原 MT5 账户中的交易行为缺陷，并展示 AI 风控介入前后（Before vs After）的真实运行成效对比</p>
+  <h1>Trading Risk Coach — Core Performance Comparison</h1>
+  <p>Real-time reconstruction of MT5 trading behavior defects, comparing account metrics before and after AI risk intervention (Before vs. After).</p>
+  <div class="nav-bar">
+    <a href="project_introduction.html" class="nav-link">Technical Docs</a>
+    <a href="replay_demo.html" class="nav-link">Replay Sandtable</a>
+    <a href="dashboard.html" class="nav-link active">KPI Dashboard</a>
+  </div>
 </div>
 
 <div class="container">
@@ -351,33 +382,33 @@
   <!-- HERO KPI -->
   <div class="hero-metric">
     <div class="hero-metric-left">
-      <h2>估算挽回账户损失</h2>
+      <h2>Estimated Losses Saved</h2>
       <div class="hero-metric-val">+$12,500+</div>
-      <div class="hero-metric-desc">以单笔最大无止损扛单风控熔断计算</div>
+      <div class="hero-metric-desc">Calculated based on single largest unhedged drawdown breaker</div>
     </div>
     <div class="hero-metric-right">
-      <p><strong>本系统重点解决了以下三个散户交易员的致命痛点：</strong></p>
+      <p><strong>This system focuses on solving three critical pain points for retail traders:</strong></p>
       <ul>
-        <li><strong>无保护性止损硬扛</strong>：避免因为一笔持仓未挂止损遭遇行情突变而爆仓。</li>
-        <li><strong>AI/人性的赌徒谬误</strong>：彻底在安全机制上切断 LLM 可能给出的“扛单”、“加仓摊平”等高危赌徒话术。</li>
-        <li><strong>处置效应（赢小亏大）</strong>：通过对历史成交数据的精准画像分析，警示持仓时长失衡与高频过度交易。</li>
+        <li><strong>No Protective Stop-Loss</strong>: Avoid blowing accounts due to sudden market shifts on positions without SL.</li>
+        <li><strong>Gambler's Fallacy & Cognitive Bias</strong>: Deterministically cut off recovery and averaging down advice from the LLM at the security layer.</li>
+        <li><strong>Disposition Effect (Win-Small-Lose-Big)</strong>: Highlight holding time imbalances and overtrading using precise user behavior profiles.</li>
       </ul>
     </div>
   </div>
 
-  <div class="sec-title"><span class="dot"></span>真实场景对比分析 (Before vs. After)</div>
+  <div class="sec-title"><span class="dot"></span>Real Scenario Comparison Analysis (Before vs. After)</div>
 
   <!-- SCENARIO 1: CATASTROPHIC LOSS -->
   <div class="scenario-card" id="sc1">
     <div class="scenario-header">
       <div class="scenario-title-area">
         <span class="scenario-num">1</span>
-        <span class="scenario-title">解决“无止损死扛”导致的爆仓风险</span>
-        <span class="scenario-badge badge-red">真实案例</span>
+        <span class="scenario-title">Mitigate Account Blow-up Risks from "Holding Losses Without SL"</span>
+        <span class="scenario-badge badge-red">Real Case</span>
       </div>
       <div class="switch-group">
-        <button class="switch-btn active" onclick="toggleScenario(1, 'before')">没有风控系统</button>
-        <button class="switch-btn" onclick="toggleScenario(1, 'after')">引入风控系统</button>
+        <button class="switch-btn active" onclick="toggleScenario(1, 'before')">Without Risk System</button>
+        <button class="switch-btn" onclick="toggleScenario(1, 'after')">With Risk System</button>
       </div>
     </div>
 
@@ -386,13 +417,13 @@
       <div class="side-panel left-side" style="grid-column: span 2; width: 100%;">
         <div class="panel-header">
           <span class="panel-status red"></span>
-          <span class="panel-title red">真实情况 (Before)：硬扛两天，损失重创账户</span>
+          <span class="panel-title red">Real Situation (Before): Holding losses for 2 days, heavy account damage</span>
         </div>
         <div class="panel-body">
-          <strong>交易行为</strong>：在 2026-02-21 01:37 开仓一笔大手数 XAUUSD（1.14手），<strong>开仓时未设置保护性止损</strong>。随后黄金行情一路单边逆行，交易员由于心理抗拒止损选择死扛。拖延 <strong>2.5 天（超3600分钟）</strong>后，在 2026-02-23 16:05 因保证金不足风险被迫手动割肉平仓，造成单笔惊人的 <strong>-$14,935.14</strong> 损失。
+          <strong>Trading Behavior</strong>: Opened a large XAUUSD short position (1.14 lots) at 2026-02-21 01:37 without setting a protective stop-loss. Gold then surged. Due to loss aversion, the trader held onto the losing position for 2.5 days (over 3600 mins) and finally cut losses manually at 2026-02-23 16:05 for a devastating -$14,935.14 loss.
         </div>
         <div class="data-block danger">
-          // 真实 MT5 数据库记录 - 未经拦截的悲剧
+          // Real MT5 Database Record - Unprotected Tragedy
           {
             "position_id": "117_paired_loss",
             "symbol": "XAUUSD",
@@ -403,7 +434,7 @@
             "open_time": "2026-02-21 01:37:26",
             "close_time": "2026-02-23 16:05:22",
             "pnl": <span class="highlight-red">-14935.14</span>,
-            "status": "closed_manual" // ❌ 无止损，死扛到极限被迫手动平仓
+            "status": "closed_manual" // ❌ No stop-loss, held to margin limit, forced manual exit
           }
         </div>
       </div>
@@ -414,22 +445,22 @@
       <div class="side-panel right-side" style="grid-column: span 2; width: 100%;">
         <div class="panel-header">
           <span class="panel-status green"></span>
-          <span class="panel-title green">系统改善 (After)：主动识别未挂止损，触发紧急熔断限制损失</span>
+          <span class="panel-title green">System Improvement (After): Proactive SL identification, triggering emergency breaker to limit losses</span>
         </div>
         <div class="panel-body">
-          <strong>风控干预</strong>：Advisor Agent 在交易运行中识别到该笔大手数订单 **未挂载止损 (stop_loss is null)**。根据 M1 真实行情数据计算出当前波动率偏高，自动判定为 🔴 **【红灯 - 熔断执行】** 状态。系统立即主动向经纪商发出 `emergency_close` 强制平仓指令，在亏损扩大到 $2,000 左右时强行斩仓，挽回了 <strong>$12,000+</strong> 的灾难性本金。
+          <strong>Risk Intervention</strong>: Advisor Agent identified that this large position **lacked a protective stop-loss (stop_loss is null)**. Based on real M1 market volatility data, it classified the risk rating as 🔴 **[RED - BREAKER]**. The system immediately called `emergency_close` to liquidate the position as losses neared $2,100, saving over <strong>$12,800+</strong> of capital from complete destruction.
         </div>
         <div class="data-block success">
-          // Trading Risk Coach - 主动执行风控结果
+          // Trading Risk Coach - Active Risk Mitigation Execution
           {
-            "analysis": "检测到活跃订单 117_paired_loss 大手数且缺少保护性止损，当前面临极端回撤风险。",
-            "risk_rating": "🔴 【红灯 - 熔断执行】",
+            "analysis": "Active position 117_paired_loss detected with high leverage and missing stop-loss. High drawdown risk detected.",
+            "risk_rating": "🔴 [RED - BREAKER]",
             "action_executed": {
               "action": "EMERGENCY_CLOSE",
               "ticket_id": "117_paired_loss",
-              "broker_response": "<span class="highlight-green">风控指令执行成功：由于回撤或风控违规，订单已被强制市价平仓！</span>",
+              "broker_response": "<span class=\"highlight-green\">Wind control execution successful: Position closed out via market order due to risk limit breach.</span>",
               "final_pnl_controlled": -2100.00,
-              "estimated_capital_saved": <span class="highlight-green">+$12835.14</span>
+              "estimated_capital_saved": <span class=\"highlight-green\">+$12835.14</span>
             }
           }
         </div>
@@ -437,7 +468,7 @@
     </div>
 
     <div class="outcome-banner banner-status">
-      ⚠️ 风险成效：没有风控保护时，这一单就亏掉了整个账户 <strong>15.6%</strong> 的总利润。
+      ⚠️ Risk Outcome: Without risk protection, this single trade wiped out <strong>15.6%</strong> of total account profits.
     </div>
   </div>
 
@@ -446,12 +477,12 @@
     <div class="scenario-header">
       <div class="scenario-title-area">
         <span class="scenario-num">2</span>
-        <span class="scenario-title">阻断 AI 建议中的“加仓摊平 / 扛单”赌徒谬误</span>
-        <span class="scenario-badge badge-red">安全防护</span>
+        <span class="scenario-title">Block LLM Gambler's Fallacy: Averaging Down & Loss Holding</span>
+        <span class="scenario-badge badge-red">Security Guardrail</span>
       </div>
       <div class="switch-group">
-        <button class="switch-btn active" onclick="toggleScenario(2, 'before')">没有风控系统</button>
-        <button class="switch-btn" onclick="toggleScenario(2, 'after')">引入风控系统</button>
+        <button class="switch-btn active" onclick="toggleScenario(2, 'before')">Without Risk System</button>
+        <button class="switch-btn" onclick="toggleScenario(2, 'after')">With Risk System</button>
       </div>
     </div>
 
@@ -460,14 +491,14 @@
       <div class="side-panel left-side" style="grid-column: span 2; width: 100%;">
         <div class="panel-header">
           <span class="panel-status red"></span>
-          <span class="panel-title red">没有安全护栏时 (Before)：大模型受诱导给出有害的“加仓摊平”建议</span>
+          <span class="panel-title red">Without Safety Guardrail (Before): LLM gets induced to output averaging-down advice</span>
         </div>
         <div class="panel-body">
-          <strong>安全隐患</strong>：当账户产生浮亏时，大模型（LLM）容易迎合交易员急于回本的焦虑心理，顺从逻辑给出“在更低位加仓拉低均价”或“继续硬扛等待反弹”等建议。这种建议实际上是在扩大仓位敞口，极易导致爆仓。
+          <strong>Security Risks</strong>: When an account has floating losses, the LLM easily targets the trader's recovery anxiety and suggests "averaging down at lower prices" or "holding trades to wait for a rebound". This expands position risk and triggers account blowups.
         </div>
         <div class="data-block danger">
-          // AI 原始未拦截的危险回答：
-          "分析到您当前的黄金多单出现浮亏，为了尽快挽回本金，<span class="highlight-red">建议您在金价下跌时加仓摊平成本</span>。这样能把您的开仓均价从 5030.0 拉低到 5010.0。只要金价稍有反弹，您就能立刻回本出局。在此期间，请<span class="highlight-red">继续扛单</span>，不要盲目止损..."
+          // Original Unprotected LLM Suggestion:
+          "Detected floating losses on XAUUSD. To recover quickly, <span class=\"highlight-red\">we suggest you average down your cost as the price falls</span>. This will lower your entry average from 5030.0 to 5010.0. Once gold rebounds slightly, you can exit break-even. Meanwhile, please <span class=\"highlight-red\">continue holding your losses</span> and do not cut..."
         </div>
       </div>
     </div>
@@ -477,24 +508,24 @@
       <div class="side-panel right-side" style="grid-column: span 2; width: 100%;">
         <div class="panel-header">
           <span class="panel-status green"></span>
-          <span class="panel-title green">有安全护栏时 (After)：确定性 Python 安全防线拦截危险内容</span>
+          <span class="panel-title green">With Safety Guardrail (After): Deterministic Python engine intercepts dangerous suggestions</span>
         </div>
         <div class="panel-body">
-          <strong>系统控制</strong>：系统引入了 `safety_rules.py` 的物理安全拦截。即使大模型在推理层产生了加仓或死扛的冲动，其最终生成的建议文本也会在 **&lt;1ms 内被正则硬过滤**，用强硬的警示和符合真实 2% 风险控制的科学规范进行替换，杜绝了有害信息到达用户端。
+          <strong>System Control</strong>: The system routes LLM text through `safety_rules.py` at the callback layer. If the LLM generates recovery or Martingale bias, it is intercepted in &lt;1ms and replaced with safe, 2% VaR limits.
         </div>
         <div class="data-block success">
-          // 安全拦截器拦截后的合规回答：
-          "<span class="highlight-green">[安全护栏已拦截原始建议]</span> 检测到该建议可能包含高风险的仓位管理逻辑（例如加仓摊平、扛单等）。系统不会输出此类建议。
+          // Sanitized Safe Output (Post-Guardrail Interceptor):
+          "<span class=\"highlight-green\">[Security Guardrail Intercepted Original Suggestion]</span> Detected that this recommendation may contain high-risk position management logic (e.g., averaging down, holding onto losses). The system does not output such recommendations.
           
-          科学风控建议：
-          1. 严格遵守单笔交易风险不超过账户总资产 <span class="highlight-green">2.0%</span> 的上限规则。
-          2. 请复盘您设置的原始止损线是否被破坏，如破坏必须立刻执行出场，切勿通过加仓稀释成本。"
+          Safe Risk Suggestions:
+          1. Strictly follow single-trade risk limits of under <span class=\"highlight-green\">2.0%</span> of capital.
+          2. Review if stop-loss thresholds were breached; if yes, exit immediately and never average down."
         </div>
       </div>
     </div>
 
     <div class="outcome-banner banner-status">
-      ⚠️ 风险成效：防范了人工智能生成危险建议导致交易员情绪化执行而扩大的次生灾害。
+      ⚠️ Risk Impact: Eradicates secondary trading disasters caused by cognitive biases or dangerous LLM hallucinations.
     </div>
   </div>
 
@@ -503,12 +534,12 @@
     <div class="scenario-header">
       <div class="scenario-title-area">
         <span class="scenario-num">3</span>
-        <span class="scenario-title">消除“拿了芝麻，丢了西瓜”的处置效应行为</span>
-        <span class="scenario-badge badge-yellow">去偏分析</span>
+        <span class="scenario-title">Eradicate the Disposition Effect: Taking Small Profits While Holding Losses</span>
+        <span class="scenario-badge badge-yellow">Cognitive De-biasing</span>
       </div>
       <div class="switch-group">
-        <button class="switch-btn active" onclick="toggleScenario(3, 'before')">没有风控系统</button>
-        <button class="switch-btn" onclick="toggleScenario(3, 'after')">引入风控系统</button>
+        <button class="switch-btn active" onclick="toggleScenario(3, 'before')">Without Risk System</button>
+        <button class="switch-btn" onclick="toggleScenario(3, 'after')">With Risk System</button>
       </div>
     </div>
 
@@ -517,13 +548,13 @@
       <div class="side-panel left-side" style="grid-column: span 2; width: 100%;">
         <div class="panel-header">
           <span class="panel-status red"></span>
-          <span class="panel-title red">无系统复盘时 (Before)：交易员陷入“赢小亏大”的心理泥潭</span>
+          <span class="panel-title red">Without System Performance Review (Before): Trader trapped in win-small-lose-big bias</span>
         </div>
         <div class="panel-body">
-          <strong>病态模式</strong>：真实数据中，交易员有很多笔持仓仅 <strong>1分钟左右</strong>、只赚了 <strong>$0.33</strong> 或 <strong>$0.40</strong> 就匆忙平仓的盈利记录（如 2026-05-12 11:39 的交易）。因为害怕盈利回吐，选择早早落袋为安。但面对亏损单，亏损单平均持仓却高达 **45.7分钟**。这导致了胜率很高，但平均亏损（-$443）几乎冲刷掉了所有平均盈利（+$447），账户成长陷入停滞。
+          <strong>Pathological Pattern</strong>: In real trading records, the trader has hundreds of short-term trades (e.g., 2026-05-12 11:39) exiting manually in 1 minute to lock in tiny profits of +$0.33 or +$0.40 due to anxiety. However, the average holding time for losing trades is 45.7 mins. This yields high win rate but average loss (-$443) offsets average win (+$447), halting net asset growth.
         </div>
         <div class="data-block danger">
-          // 典型“赢小”交易记录：
+          // Typical Take-Profit-Early (Win Small) Trade Record:
           {
             "symbol": "XAUUSD",
             "direction": "BUY",
@@ -532,7 +563,7 @@
             "close_price": 4760.53,
             "open_time": "2026-05-12 11:39:03",
             "close_time": "2026-05-12 11:40:25",
-            "pnl": <span class="highlight-red">+0.33</span>, // 仅持仓 1min 22秒 就早早离场以锁定极其微薄的利润
+            "pnl": <span class="highlight-red">+0.33</span>, // Held for only 1m 22s to lock in microscopic profits
             "status": "closed_manual"
           }
         </div>
@@ -544,50 +575,50 @@
       <div class="side-panel right-side" style="grid-column: span 2; width: 100%;">
         <div class="panel-header">
           <span class="panel-status green"></span>
-          <span class="panel-title green">引入系统复盘后 (After)：精准计算偏差系数，纠正快速止盈偏见</span>
+          <span class="panel-title green">With System Performance Review (After): Quantify bias index, correct premature profit-taking</span>
         </div>
         <div class="panel-body">
-          <strong>认知纠偏</strong>：Analysis Agent 精准分析 3,225 笔 XAUUSD 交易后，计算出当前账户的 **处置效应系数（Disposition Ratio）为 0.99**。Critic Agent 随即发出明确警示：胜率 58.6% 虽然不错，但是“快速止盈（均持仓仅1min）”极大限制了期望利润的发展。风控建议书强制纠错，指导交易员改变持仓风险期望结构。
+          <strong>Cognitive De-biasing</strong>: The Analysis Agent computes a Disposition Effect Index of 0.99 by scanning 3,225 trades. The Critic Agent issues warnings: win rate of 58.6% is acceptable, but 1-min quick exits restrict risk expected profits. The audit report forces a readjustment of the holding-time profile.
         </div>
         <div class="data-block success">
-          // 智能风控诊断意见书提取：
-          "📊 诊断结论：账户当前虽然累计盈利，但存在高频快速止盈行为（1分钟内平仓多达数百笔，最低单笔盈利仅 $0.33）。
+          // Extract from Quantitative Risk Audit Report:
+          "📊 Audit Conclusion: Account is profitable overall, but suffers from high-frequency premature profit-taking (hundreds of exits within 1 min, smallest win +$0.33).
           
-          💡 认知纠偏对策：
-          1. 强制延长盈利单持仓时长（盈/亏持仓时间比应从目前的 1.5 倍提升至 2 倍以上）。
-          2. 禁止手动提前止盈，采用分批止盈挂单法，让利润随着真实波动（由 get_market_context 获取）自然释放。"
+          💡 De-biasing Recommendations:
+          1. Increase profit holding duration (the win/loss holding ratio should be increased from 1.5x to 2x+).
+          2. Forbid premature manual exits. Use scale-out orders to allow profits to run naturally with volatility."
         </div>
       </div>
     </div>
 
     <div class="outcome-banner banner-status">
-      ⚠️ 风险成效：帮助交易员将交易行为从“赚点就跑，亏了死扛”的非理性状态，调整到“让利润奔跑，严格止损”的科学状态。
+      ⚠️ Risk Impact: Helps shift trading behavior from irrational 'take profits quickly, hold onto losses' to structured 'let profits run, cut losses short'.
     </div>
   </div>
 
   <!-- HOW IT WORKS -->
   <div class="impl-section">
-    <div class="impl-title">系统如何运作？(Google ADK 多智能体闭环)</div>
+    <div class="impl-title">How it Works (Google ADK Multi-Agent Closed Loop)</div>
     <div class="impl-steps">
       <div class="impl-step">
         <div class="impl-step-num">01</div>
-        <div class="impl-step-title">历史观测</div>
-        <div class="impl-step-desc">Analysis Agent 通过 MCP 接口读取匿名化交易记录和真实 M1 行情 (real_trades.csv + XAUUSD_M1.csv)。</div>
+        <div class="impl-step-title">Historical Observation</div>
+        <div class="impl-step-desc">The Analysis Agent reads anonymized trade records and real M1 candles via the MCP stdio interface (real_trades.csv + XAUUSD_M1.csv).</div>
       </div>
       <div class="impl-step">
         <div class="impl-step-num">02</div>
-        <div class="impl-step-title">诊断评级</div>
-        <div class="impl-step-desc">Advisor Agent 依据 SKILL.md 设定的处置效应阈值进行评估，划定绿/黄/红三态状态。</div>
+        <div class="impl-step-title">Diagnosis & Rating</div>
+        <div class="impl-step-desc">The Advisor Agent evaluates metrics using SKILL.md thresholds to classify risk states (Green, Yellow, Red).</div>
       </div>
       <div class="impl-step">
         <div class="impl-step-num">03</div>
-        <div class="impl-step-title">历史回放模拟</div>
-        <div class="impl-step-desc">Advisor 调用 `simulate_historical_risk_replay`，把历史交易当作当时的活跃持仓，模拟硬止损或熔断动作。</div>
+        <div class="impl-step-title">Historical Replay</div>
+        <div class="impl-step-desc">The Advisor calls simulate_historical_risk_replay to backtest historical trades as active positions, simulating protective SL and breakers.</div>
       </div>
       <div class="impl-step">
         <div class="impl-step-num">04</div>
-        <div class="impl-step-title">确定性过滤</div>
-        <div class="impl-step-desc">经过 Python 安全过滤硬阻断赌徒式分析，最终由 Critic 审计输出量化建议书。</div>
+        <div class="impl-step-title">Deterministic Filtering</div>
+        <div class="impl-step-desc">LLM text runs through Python security filters to block gambler patterns, and is audited by the Critic Agent to print quantitative advice.</div>
       </div>
     </div>
   </div>
@@ -614,13 +645,13 @@
 
       // Update outcome banner text to reflect "Before" state
       if (id === 1) {
-        banner.innerHTML = '⚠️ 风险后果：没有风控保护时，这一单就亏掉了整个账户 <strong>15.6%</strong> 的总利润。';
+        banner.innerHTML = '⚠️ Risk Outcome: Without risk protection, this single trade wiped out <strong>15.6%</strong> of total account profits.';
         banner.className = 'outcome-banner banner-status bad';
       } else if (id === 2) {
-        banner.innerHTML = '⚠️ 风险后果：防范了人工智能生成危险建议导致交易员情绪化执行而扩大的次生灾害。';
+        banner.innerHTML = '⚠️ Risk Outcome: High risk of emotional trading execution due to dangerous hallucinations generated by unconstrained AI models.';
         banner.className = 'outcome-banner banner-status bad';
       } else if (id === 3) {
-        banner.innerHTML = '⚠️ 风险后果：陷入“赚点就跑，亏了死扛”的恶性循环，最终吞没全部盈利本金。';
+        banner.innerHTML = '⚠️ Risk Outcome: Trapped in a vicious cycle of premature profit-taking and loss-holding, eventually erasing all net capital gains.';
         banner.className = 'outcome-banner banner-status bad';
       }
     } else {
@@ -631,13 +662,13 @@
 
       // Update outcome banner text to reflect "After" state
       if (id === 1) {
-        banner.innerHTML = '🛡️ 风控成效：系统成功介入并自动平仓，挽回 <strong>+$12,835.14</strong> 的保证金，仓位生存率提升 100%。';
+        banner.innerHTML = '🛡️ Risk Control Impact: System successfully liquidated the trade at limit, saving <strong>+$12,835.14</strong> of capital. Position survival rate increased by 100%.';
         banner.className = 'outcome-banner banner-status';
       } else if (id === 2) {
-        banner.innerHTML = '🛡️ 安全成效：输出中完全抹去危险交易行为诱导，确保 <strong>100% 遵守科学仓位限制与止损纪律</strong>。';
+        banner.innerHTML = '🛡️ Safety Guardrail Impact: Dangerous recovery logic completely erased from output, ensuring <strong>100% compliance with risk management rules</strong>.';
         banner.className = 'outcome-banner banner-status';
       } else if (id === 3) {
-        banner.innerHTML = '🛡️ 去偏成效：自动识别超短线套利性止盈偏见，强制要求交易员<strong>提升盈亏持仓时间比</strong>以改善长期回报期望。';
+        banner.innerHTML = '🛡️ De-biasing Impact: Premature manual profit-taking bias detected, guiding the trader to <strong>improve the win-to-loss holding time ratio</strong> to maximize returns.';
         banner.className = 'outcome-banner banner-status';
       }
     }

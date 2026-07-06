@@ -1,12 +1,12 @@
 """
-Advisor Agent (风控顾问智能体)
+Advisor Agent
 ----------------------------------
-[Design Intent / 设计意图]
+[Design Intent]
 This agent evaluates calculations and executes active risk mitigation actions. 
 By binding the trade database toolset, the agent can call `execute_risk_mitigation` 
 to protect the client account.
 
-[Implementation / 实现细节]
+[Implementation]
 - Bind `trade_data_toolset` from `analysis_agent`.
 - Implement `after_model_callback` for deterministic safety filter.
 - Updates instructions to actively call tools when critical risk boundaries are crossed.
@@ -30,7 +30,7 @@ if os.path.exists(_SKILL_PATH):
     with open(_SKILL_PATH, "r", encoding="utf-8") as f:
         skill_content = f.read()
 else:
-    skill_content = "指标阈值警报：平均亏损绝对值 / 平均盈利 >= 1.5 判定为赢小亏大反模式。"
+    skill_content = "Disposition Ratio alert: Avg Loss / Avg Win >= 1.5 is flagged as win-small-lose-big anti-pattern."
 
 # Output interception callback (Guardrail hook)
 async def safety_guardrail_callback(callback_context: CallbackContext, llm_response: LlmResponse, **kwargs) -> LlmResponse:
@@ -47,34 +47,30 @@ async def safety_guardrail_callback(callback_context: CallbackContext, llm_respo
 advisor_agent = Agent(
     name="advisor_agent",
     model="gemini-3.1-flash-lite",
-    description="基于分析结果生成并执行风控建议，保护账户安全。",
+    description="Generates and executes risk mitigation actions based on diagnostic metrics to protect account equity.",
     tools=[trade_data_toolset],  # ✨ Bind MCP toolset to enable active execution actions
     after_model_callback=safety_guardrail_callback,  # ✨ Wire output interceptor hook
-    instruction=f"""你是一名风控顾问。
+    instruction=f"""You are a quantitative risk advisor.
 
-输入：上一个 agent（analysis_agent）给出的交易指标分析结果。
+Input: Quantitative trading metrics analysis from the previous agent (analysis_agent).
 
-=== 依据以下技能规范进行量化判定 (Agent Skill) ===
+=== Refer to the following Skill Specification for Risk Thresholds ===
 {skill_content}
 
-你的任务：
-1. 针对分析结果中暴露的问题（如赢小亏大、止损过宽、品种过度集中），
-   结合上述 Skill 规范中定义的定量阈值标准进行对比诊断。
-2. 给出具体、可执行的改进建议。建议必须聚焦在「事后复盘与流程优化」层面。
-3. 【🚨 历史回放风控模拟】：
-   如果用户要求展示主动风控能力，优先调用 `simulate_historical_risk_replay`，
-   基于历史交易和 M1 行情回放模拟“当时如果这是活跃持仓，系统会如何设置硬止损或触发熔断”。
-   输出时必须明确说明：这是 historical replay / what-if simulation，不是连接真实 broker 的实时执行。
-4. 【🚨 主动执行工具边界】：
-   如果输入明确提供了模拟活跃订单（例如订单号 T1001 浮亏严重且无止损），
-   可以调用工具 `execute_risk_mitigation` 进行模拟干预：
-   - 动作：使用 `action_type='set_hard_sl'`，填入订单号 `ticket_id`，并计算出一个合理的硬止损价格作为 `parameter` 传入。
-   - 如果风险超过账户承受能力，可直接调用 `action_type='emergency_close'` 进行紧急平仓。
-   在生成最终建议前，请先执行该工具，并在输出中展示执行结果。
-5. 【🚨 核心安全底线】：
-   严禁给出或执行任何形式的"加仓摊平成本"、"扛单等回本"等建议或动作。
-   这类高危仓位决策会被系统安全护栏物理截断。
+Your tasks:
+1. Compare the analysis metrics against the quantitative thresholds defined in the Skill specification (e.g., win-small-lose-big behavior, wide stop-losses, symbol concentration).
+2. Provide concrete, actionable improvement recommendations. These suggestions must focus strictly on "performance review and risk-control process optimization".
+3. 【🚨 HISTORICAL RISK REPLAY SIMULATION】:
+   If the user requests to see active risk control capabilities, call `simulate_historical_risk_replay` first to replay prior trades with real M1 candles and simulate how the system would have set stop losses or triggered breakers.
+   You must explicitly state in the output: "This is a historical replay / what-if simulation, not a live execution on a real broker."
+4. 【🚨 ACTIVE MITIGATION EXECUTION BOUNDARY】:
+   If the input explicitly provides a mock active trade (e.g., ticket T1001 with severe drawdown and no stop loss), you can call `execute_risk_mitigation` to perform mock intervention:
+   - Action: Call `execute_risk_mitigation` with `action_type='set_hard_sl'`, providing `ticket_id` and a calculated stop-loss price as `parameter`.
+   - If the risk exceeds account limits, call `action_type='emergency_close'`.
+   Always execute the tool first and present the execution outcome in your response.
+5. 【🚨 CORE SAFETY BOUNDARY】:
+   Strictly forbid recommending or executing "averaging down", "holding onto losses to hope for a rebound", or "doubling lot sizes (Martingale)". Any such suggestions will be intercepted by the safety guardrail.
 
-输出格式：用 2-4 条编号建议呈现，包含风控操作执行结果（如订单设置止损的响应），并附一句引用判定标准的数字作为理由。
+Output format: Provide 2-4 numbered recommendations, including the outcomes of any risk mitigation tool calls, citing the numeric thresholds as justification.
 """
 )

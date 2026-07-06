@@ -1,17 +1,17 @@
 """
-Trade Data & Active Mitigation MCP Server (数据与主动风控执行 MCP 服务端)
+Trade Data & Active Mitigation MCP Server
 -----------------------------------------------------------------------
-[Design Intent / 设计意图]
+[Design Intent]
 This server handles both READ operations (fetching anonymized real historical trade logs from
 MT5 exports) and WRITE operations (simulating active risk mitigation
 actions like setting stop losses or emergency closes).
 
-[Data Source / 数据来源]
+[Data Source]
 real_trades.csv: 3,225 paired open/close XAUUSD trade records from anonymized MT5 exports.
 XAUUSD_M1.csv: 173,391 rows of real XAUUSD 1-minute OHLCV candles.
 Fields include open_price, close_price, open_time, close_time, pnl, lot_size, symbol, etc.
 
-[Implementation / 实现细节]
+[Implementation]
 - FastMCP tool registry.
 - Historical data tools: `get_recent_trades`, `get_symbol_history`, `get_account_stats`, `get_symbol_breakdown`, `get_market_context`, `simulate_historical_risk_replay`.
 - Active execution tool: `execute_risk_mitigation` simulates broker risk actions.
@@ -37,10 +37,10 @@ def _load_trades() -> pd.DataFrame:
 
 @mcp.tool()
 def get_recent_trades(days: int = 30) -> str:
-    """获取最近 N 天的已完成交易记录（开平仓配对）。
+    """Fetch completed paired trade records for the last N days.
 
     Args:
-        days: 回溯天数，默认 30 天
+        days: Lookback days, defaults to 30.
     """
     df = _load_trades()
     cutoff = df["close_time"].max() - pd.Timedelta(days=days)
@@ -50,11 +50,11 @@ def get_recent_trades(days: int = 30) -> str:
 
 @mcp.tool()
 def get_symbol_history(symbol: str, limit: int = 100) -> str:
-    """获取某个交易品种的历史交易记录。
+    """Fetch historical trade records for a specific symbol.
 
     Args:
-        symbol: 品种代码，例如 'XAUUSD'、'NAS100'
-        limit: 最多返回记录数，默认 100
+        symbol: Symbol name, e.g., 'XAUUSD', 'NAS100'.
+        limit: Maximum number of records, defaults to 100.
     """
     df = _load_trades()
     filtered = df[df["symbol"].str.upper() == symbol.upper()].tail(limit)
@@ -63,11 +63,11 @@ def get_symbol_history(symbol: str, limit: int = 100) -> str:
 
 @mcp.tool()
 def get_account_stats(symbol: str = None, days: int = 90) -> str:
-    """计算账户核心风控指标：胜率、平均盈亏、盈亏比、处置效应系数。
+    """Calculate account core performance metrics: win rate, average win/loss, reward-risk ratio, and Disposition Ratio.
 
     Args:
-        symbol: 可选，指定品种进行过滤（如 'XAUUSD'）；不填则统计全部品种
-        days: 统计最近多少天，默认 90 天
+        symbol: Optional symbol filter (e.g. 'XAUUSD'); defaults to all symbols.
+        days: Number of days to include, defaults to 90.
     """
     df = _load_trades()
     cutoff = df["close_time"].max() - pd.Timedelta(days=days)
@@ -120,7 +120,7 @@ def get_account_stats(symbol: str = None, days: int = 90) -> str:
 
 @mcp.tool()
 def get_symbol_breakdown() -> str:
-    """获取各交易品种的汇总统计（交易次数、胜率、总盈亏）。"""
+    """Fetch summary statistics for each symbol (trade counts, win rate, net PnL)."""
     df = _load_trades()
     result = {}
     for sym, group in df.groupby("symbol"):
@@ -137,18 +137,18 @@ def get_symbol_breakdown() -> str:
 
 @mcp.tool()
 def get_market_context(trade_time: str, window_minutes: int = 30) -> str:
-    """获取某笔交易时刻前后的 XAUUSD M1 市场行情（真实 K 线数据）。
+    """Query XAUUSD M1 market candles around a specific trade execution timestamp.
 
     Args:
-        trade_time: 交易时间字符串，格式 'YYYY-MM-DD HH:MM:SS'
-        window_minutes: 前后各取多少分钟的 K 线，默认 30 分钟
+        trade_time: Execution time string in 'YYYY-MM-DD HH:MM:SS' format.
+        window_minutes: Lookback/lookforward minutes, defaults to 30.
     """
     if not M1_PATH.exists():
         return json.dumps({"error": "M1 market data not available."})
 
     m1 = pd.read_csv(M1_PATH, parse_dates=["time"])
     try:
-        center = pd.to_datetime(trade_time)
+        center = pd.to_datetime(trade_time) - pd.Timedelta(hours=8)
     except Exception:
         return json.dumps({"error": f"Invalid time format: {trade_time}"})
 
@@ -181,7 +181,7 @@ def simulate_historical_risk_replay(
     hard_stop_points: float = 5.0,
     emergency_points: float = 10.0,
 ) -> str:
-    """用历史交易和真实 M1 行情回放模拟主动风控。
+    """Backtest and simulate risk-control actions using historical trades and real M1 price paths.
 
     This is a historical what-if simulation, not live broker execution. It replays
     each historical trade as if it were an active position at the time, then checks
@@ -191,29 +191,35 @@ def simulate_historical_risk_replay(
     small source/timezone/quote-level differences.
 
     Args:
-        limit: 取最近多少笔可回放交易，默认 20。
-        hard_stop_points: 模拟硬止损距离，默认 5 XAUUSD points。
-        emergency_points: 模拟熔断距离，默认 10 XAUUSD points。
+        limit: Max number of replayable trades, defaults to 20.
+        hard_stop_points: Mock stop-loss distance, defaults to 5.0 XAUUSD points.
+        emergency_points: Mock breaker distance, defaults to 10.0 XAUUSD points.
     """
     if not M1_PATH.exists():
         return json.dumps({"error": "M1 market data not available."})
 
     trades = _load_trades()
+    # Convert trades times to Datetime objects and subtract 8 hours for UTC M1 matching
+    trades["open_time_dt"] = pd.to_datetime(trades["open_time"])
+    trades["close_time_dt"] = pd.to_datetime(trades["close_time"])
+    trades["open_time_utc"] = trades["open_time_dt"] - pd.Timedelta(hours=8)
+    trades["close_time_utc"] = trades["close_time_dt"] - pd.Timedelta(hours=8)
+
     m1 = pd.read_csv(M1_PATH, parse_dates=["time"])
     m1_start = m1["time"].min()
     m1_end = m1["time"].max()
 
     replayable = trades[
         (trades["symbol"].str.upper() == "XAUUSD")
-        & (trades["open_time"] >= m1_start)
-        & (trades["close_time"] <= m1_end)
+        & (trades["open_time_utc"] >= m1_start)
+        & (trades["close_time_utc"] <= m1_end)
     ].tail(limit)
 
     events = []
     for _, trade in replayable.iterrows():
         window = m1[
-            (m1["time"] >= trade["open_time"])
-            & (m1["time"] <= trade["close_time"])
+            (m1["time"] >= trade["open_time_utc"])
+            & (m1["time"] <= trade["close_time_utc"])
         ]
         if window.empty:
             continue
@@ -301,15 +307,15 @@ def simulate_historical_risk_replay(
 
 @mcp.tool()
 def execute_risk_mitigation(action_type: str, ticket_id: str, parameter: float = None) -> str:
-    """执行主动风控干预动作（模拟经纪商指令）。
+    """Execute active risk mitigation actions (simulating broker execution instructions).
 
     Args:
-        action_type: 动作类型：'set_hard_sl'（设置硬止损）或 'emergency_close'（紧急平仓）
-        ticket_id: 订单识别码（例如 'T1001' 或真实 position_id）
-        parameter: 动作参数，设置硬止损时传入止损价格（必须 > 0）
+        action_type: Mitigation type: 'set_hard_sl' or 'emergency_close'.
+        ticket_id: Position ticket identifier (e.g. 'T1001' or real database ID).
+        parameter: Optional parameter (e.g., target stop loss price).
 
     Returns:
-        执行结果 JSON 字符串
+        JSON response from the mock broker execution endpoint.
     """
     action_type = action_type.lower().strip()
 
@@ -318,12 +324,12 @@ def execute_risk_mitigation(action_type: str, ticket_id: str, parameter: float =
         if parameter is None or parameter <= 0:
             return json.dumps({
                 "status": "error",
-                "message": f"无效的止损价格参数 {parameter}，止损价必须大于 0。",
+                "message": f"Invalid stop loss price parameter {parameter}; stop loss must be greater than 0.",
                 "ticket_id": ticket_id,
             })
         response = {
             "status": "success",
-            "message": f"风控指令执行成功：订单 {ticket_id} 已成功挂载硬止损，止损价格设置为 {parameter}",
+            "message": f"Wind control execution successful: Order {ticket_id} stop loss successfully set at {parameter}",
             "ticket_id": ticket_id,
             "action": "SET_STOP_LOSS",
             "value": parameter,
@@ -331,14 +337,14 @@ def execute_risk_mitigation(action_type: str, ticket_id: str, parameter: float =
     elif action_type == "emergency_close":
         response = {
             "status": "success",
-            "message": f"风控指令执行成功：由于回撤或风控违规，订单 {ticket_id} 已被强制市价平仓！",
+            "message": f"Wind control execution successful: Order {ticket_id} closed at market due to risk limit breach!",
             "ticket_id": ticket_id,
             "action": "EMERGENCY_CLOSE",
         }
     else:
         response = {
             "status": "error",
-            "message": f"未知的风控指令类型: {action_type}。支持的类型：set_hard_sl、emergency_close",
+            "message": f"Unknown risk mitigation action: {action_type}. Supported actions: set_hard_sl, emergency_close",
         }
     return json.dumps(response, ensure_ascii=False)
 

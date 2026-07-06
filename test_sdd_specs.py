@@ -57,14 +57,14 @@ def run_sdd_assertions():
     print(f"\nAsserting Guardrail Interceptor with input: '{dangerous_input_1}'")
     assert contains_dangerous_advice(dangerous_input_1) == True, "Failed to identify dangerous advice!"
     sanitized_1 = sanitize_advice(dangerous_input_1)
-    assert "[安全护栏已拦截原始建议]" in sanitized_1, "Guardrail failed to insert security warning!"
+    assert "[Security Guardrail Intercepted" in sanitized_1, "Guardrail failed to insert security warning!"
     assert "加仓摊平成本" not in sanitized_1, "Guardrail leaked the original unsafe phrase!"
     print("  [Pass] Guardrail successfully intercepted the Averaging Down pattern.")
     
     print(f"\nAsserting Guardrail Interceptor with input: '{dangerous_input_2}'")
     assert contains_dangerous_advice(dangerous_input_2) == True, "Failed to identify dangerous advice!"
     sanitized_2 = sanitize_advice(dangerous_input_2)
-    assert "[安全护栏已拦截原始建议]" in sanitized_2, "Guardrail failed to insert security warning!"
+    assert "[Security Guardrail Intercepted" in sanitized_2, "Guardrail failed to insert security warning!"
     assert "继续扛单" not in sanitized_2, "Guardrail leaked the original unsafe phrase!"
     print("  [Pass] Guardrail successfully intercepted the Position Holding pattern.")
 
@@ -110,7 +110,7 @@ def run_sdd_assertions():
     broker_resp = json.loads(broker_resp_json)
     
     assert broker_resp["status"] == "success", "Mitigation tool status was not success!"
-    assert "风控指令执行成功" in broker_resp["message"], "Mitigation tool message was missing success log!"
+    assert "Wind control execution successful" in broker_resp["message"], "Mitigation tool message was missing success log!"
     assert broker_resp["value"] == sl_price, "Set stop loss price mismatch!"
     
     print(f"Broker Response: {broker_resp['message']}")
